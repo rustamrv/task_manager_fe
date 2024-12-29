@@ -3,11 +3,16 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { Input } from '@/components/ui/input'; // Reusable Input component
-import { Button } from '@/components/ui/button'; // Reusable Button component
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { Label } from '@/components/ui/label';
+
 import { useRegisterUserMutation } from '../api/apiSlice';
 import { useDispatch } from 'react-redux';
-import { setToken } from '../api';
+import { setToken } from '../api/authReducer';
+import { BackendError } from '../interfaces/Types';
+
+
 
 const registerSchema = z
   .object({
@@ -60,12 +65,33 @@ const Register: React.FC = () => {
       } else {
         throw new Error('No token returned by the server.');
       }
-    } catch (error: any) {
+    } catch (error_) {
+      const error = error_ as BackendError;
+
       console.error('Registration error:', error);
       setServerError(
         error?.data?.message || 'Failed to register. Please try again.'
       );
     }
+  };
+
+  // Create a prioritized error message logic
+  const renderError = () => {
+    if (errors.confirmPassword) {
+      return (
+        <p className="text-red-500 text-sm">{errors.confirmPassword.message}</p>
+      );
+    }
+    if (errors.password) {
+      return <p className="text-red-500 text-sm">{errors.password.message}</p>;
+    }
+    if (errors.email) {
+      return <p className="text-red-500 text-sm">{errors.email.message}</p>;
+    }
+    if (errors.username) {
+      return <p className="text-red-500 text-sm">{errors.username.message}</p>;
+    }
+    return null;
   };
 
   return (
@@ -80,68 +106,54 @@ const Register: React.FC = () => {
       </div>
 
       {/* Form Section */}
-      <div className="flex flex-col justify-center items-center md:w-1/2 md:pl-12">
+      <div className="flex flex-col justify-center items-center w-full md:w-1/2 md:pl-12">
         <form
           className="flex flex-col gap-4 w-full max-w-md"
           onSubmit={handleSubmit(onSubmit)}
         >
           {/* Username Field */}
-          <label htmlFor="username" className="text-sm font-medium">
+          <Label htmlFor="username" className="text-sm font-medium">
             Username
-          </label>
+          </Label>
           <Input
             id="username"
             type="text"
             placeholder="Enter your username"
             {...register('username')}
           />
-          {errors.username && (
-            <p className="text-red-500 text-sm">{errors.username.message}</p>
-          )}
 
           {/* Email Field */}
-          <label htmlFor="email" className="text-sm font-medium">
+          <Label htmlFor="email" className="text-sm font-medium">
             Email
-          </label>
+          </Label>
           <Input
             id="email"
             type="email"
             placeholder="Enter your email"
             {...register('email')}
           />
-          {errors.email && (
-            <p className="text-red-500 text-sm">{errors.email.message}</p>
-          )}
 
           {/* Password Field */}
-          <label htmlFor="password" className="text-sm font-medium">
+          <Label htmlFor="password" className="text-sm font-medium">
             Password
-          </label>
+          </Label>
           <Input
             id="password"
             type="password"
             placeholder="Enter your password"
             {...register('password')}
           />
-          {errors.password && (
-            <p className="text-red-500 text-sm">{errors.password.message}</p>
-          )}
 
           {/* Confirm Password Field */}
-          <label htmlFor="confirmPassword" className="text-sm font-medium">
+          <Label htmlFor="confirmPassword" className="text-sm font-medium">
             Confirm Password
-          </label>
+          </Label>
           <Input
             id="confirmPassword"
             type="password"
             placeholder="Confirm your password"
             {...register('confirmPassword')}
           />
-          {errors.confirmPassword && (
-            <p className="text-red-500 text-sm">
-              {errors.confirmPassword.message}
-            </p>
-          )}
 
           {/* Server Error */}
           {serverError && (
@@ -149,6 +161,8 @@ const Register: React.FC = () => {
               {serverError}
             </p>
           )}
+
+          {renderError()}
 
           <Button
             type="submit"

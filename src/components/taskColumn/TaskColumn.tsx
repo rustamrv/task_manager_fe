@@ -1,49 +1,42 @@
 import React from 'react';
 import { useDrop } from 'react-dnd';
 import TaskCard from '@/components/taskCard/TaskCard';
-import { Task } from '../../interfaces';
+import { Task } from '../../interfaces/Task';
 
 interface TaskColumnProps {
   title: string;
   tasks: Task[];
-  onUpdateTask: (updatedTask: Task) => void;
-  onDeleteTask: (id: string) => void;
-  onDropTask: (draggedTask: Task) => void;
+  refetch: () => void;
+  onDropTask: (draggedTask: Task, targetStatus: string) => void;
 }
 
 const TaskColumn: React.FC<TaskColumnProps> = ({
   title,
   tasks,
-  onUpdateTask,
-  onDeleteTask,
+  refetch,
   onDropTask,
 }) => {
-  const [, dropRef] = useDrop(() => ({
+  const [, drop] = useDrop({
     accept: 'TASK',
-    drop: (draggedTask: Task) => {
-      onDropTask(draggedTask);
-    },
-  }));
+    drop: (draggedTask: Task) => onDropTask(draggedTask, title),
+  });
 
   return (
     <div
-      ref={dropRef}
-      className="flex flex-col gap-4 border rounded-lg p-4 h-full min-w-[300px] w-[350px] bg-gray-50 shadow-md"
+      ref={drop}
+      className="flex flex-col gap-4 border rounded-lg p-4 shadow-md bg-gray-50 min-w-[150px] sm:min-w-[200px] lg:min-w-[250px] xl:min-w-[300px]"
     >
-      <header className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold">{title}</h2>
+      <header className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold sm:text-xl lg:text-2xl">
+          {title}
+        </h2>
         <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
           {tasks.length}
         </span>
       </header>
       <div className="flex flex-col gap-4">
         {tasks.map((task, index) => (
-          <TaskCard
-            key={index}
-            task={task}
-            onUpdate={(updatedTask) => onUpdateTask(updatedTask)}
-            onDelete={() => onDeleteTask(task.id)}
-          />
+          <TaskCard key={task.id} task={task} refetch={refetch} />
         ))}
       </div>
     </div>

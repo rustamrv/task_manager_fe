@@ -1,7 +1,7 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Button } from '../ui/button';
+import { Button } from '../ui/Button';
 import { useDispatch } from 'react-redux';
-import { clearToken } from '../../api';
+import { clearToken } from '../../api/authReducer';
 import { useGetProfileQuery } from '../../api/apiSlice';
 
 interface NavbarProps {
@@ -17,6 +17,30 @@ const Navbar: React.FC<NavbarProps> = ({ className }) => {
     dispatch(clearToken());
     navigate('/');
   };
+
+  const MenuItem = ({
+    to,
+    icon,
+    label,
+  }: {
+    to: string;
+    icon: string;
+    label: string;
+  }) => (
+    <li className="flex items-center justify-center lg:justify-start">
+      <img src={icon} alt={label} className="w-5 h-5 mr-2 lg:mr-0" />
+      <NavLink
+        to={to}
+        className={({ isActive }) =>
+          isActive
+            ? 'font-bold text-blue-600 underline text-sm pl-2'
+            : 'text-blue-600 hover:underline text-sm pl-2 hover:text-blue-400'
+        }
+      >
+        {label}
+      </NavLink>
+    </li>
+  );
 
   return (
     <nav
@@ -48,58 +72,18 @@ const Navbar: React.FC<NavbarProps> = ({ className }) => {
       </div>
 
       {/* Menu */}
-      <ul className="flex flex-row justify-center lg:flex-col gap-4 lg:gap-6 w-full">
-        <li className="flex items-center justify-center lg:justify-start">
-          <img
-            src="/images/icon-home.png"
-            alt="Home"
-            className="w-5 h-5 mr-2 lg:mr-0"
-          />
-          <NavLink
-            to="/dashboard"
-            className={({ isActive }) =>
-              isActive
-                ? 'font-bold text-blue-600 underline text-sm pl-2'
-                : 'text-blue-600 hover:underline text-sm pl-2 hover:text-blue-400'
-            }
-          >
-            Home
-          </NavLink>
-        </li>
-        <li className="flex items-center justify-center lg:justify-start">
-          <img
-            src="/images/icon-report.svg"
-            alt="Task Reports"
-            className="w-5 h-5 mr-2 lg:mr-0"
-          />
-          <NavLink
-            to="/reports"
-            className={({ isActive }) =>
-              isActive
-                ? 'font-bold text-blue-600 underline text-sm pl-2'
-                : 'text-blue-600 hover:underline text-sm pl-2 hover:text-blue-400'
-            }
-          >
-            Task Reports
-          </NavLink>
-        </li>
-        <li className="flex items-center justify-center lg:justify-start">
-          <img
-            src="/images/icon-setting.png"
-            alt="Settings"
-            className="w-5 h-5 mr-2 lg:mr-0"
-          />
-          <NavLink
-            to="/settings"
-            className={({ isActive }) =>
-              isActive
-                ? 'font-bold text-blue-600 underline text-sm pl-2'
-                : 'text-blue-600 hover:underline text-sm pl-2 hover:text-blue-400'
-            }
-          >
-            Settings
-          </NavLink>
-        </li>
+      <ul className="flex flex-row justify-center lg:flex-col gap-4 lg:gap-6 w-full pl-8">
+        <MenuItem to="/dashboard" icon="/images/icon-home.png" label="Home" />
+        <MenuItem
+          to="/reports"
+          icon="/images/icon-report.svg"
+          label="Task Reports"
+        />
+        <MenuItem
+          to="/settings"
+          icon="/images/icon-setting.png"
+          label="Settings"
+        />
       </ul>
 
       <div className="flex p-4">

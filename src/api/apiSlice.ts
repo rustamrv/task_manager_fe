@@ -1,19 +1,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { Task } from '../interfaces';
+import { configureStore } from '@reduxjs/toolkit';
+import { User } from '../interfaces/User';
 
-interface User {
-  _id: string;
-  username: string;
-  email: string;
-}
-
-interface Profile {
-  _id: string;
-  username: string;
-  email: string;
-  profileImage: string;
-}
-
+// Base API configuration
 export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({
@@ -26,92 +15,101 @@ export const apiSlice = createApi({
       return headers;
     },
   }),
+  endpoints: () => ({}),
+});
+
+export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    registerUser: builder.mutation<
-      { token: string; message: string },
-      { username: string; password: string; email: string }
-    >({
+    registerUser: builder.mutation({
       query: (newUser) => ({
         url: 'auth/register',
         method: 'POST',
         body: newUser,
       }),
     }),
-
-    loginUser: builder.mutation<
-      { token: string },
-      { email: string; password: string }
-    >({
+    loginUser: builder.mutation({
       query: (credentials) => ({
         url: 'auth/login',
         method: 'POST',
         body: credentials,
       }),
     }),
+  }),
+});
 
+export const usersApi = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
     getAllUsers: builder.query<User[], void>({
       query: () => 'profile/users',
     }),
+    getProfile: builder.query<User, void>({
+      query: () => 'profile',
+    }),
+    updateProfile: builder.mutation({
+      query: (formData) => ({
+        url: 'profile/upload',
+        method: 'PUT',
+        body: formData,
+      }),
+    }),
+  }),
+});
 
+export const tasksApi = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
     getAllTasks: builder.query<any[], void>({
       query: () => '/tasks',
     }),
-
-    getTasksByStatus: builder.query<Task[], string>({
-      query: (status) => `/api/tasks/status/${status}`,
+    getTaskById: builder.query({
+      query: (id) => `/tasks/${id}`,
     }),
-
-    getTaskById: builder.query<Task, number>({
-      query: (id) => `/api/tasks/${id}`,
-    }),
-
-    getProfile: builder.query<Profile, void>({
-      query: () => 'profile',
-    }),
-
-    addTask: builder.mutation<Task, any>({
+    addTask: builder.mutation({
       query: (task) => ({
         url: '/tasks',
         method: 'POST',
         body: task,
       }),
     }),
-    updateTask: builder.mutation<Task, { id: string; task: Partial<Task> }>({
+    updateTask: builder.mutation({
       query: ({ id, task }) => ({
         url: `/tasks/${id}`,
         method: 'PUT',
         body: task,
       }),
     }),
-    deleteTask: builder.mutation<{ id: string }, string>({
-      query: (id) => ({ url: `/tasks/${id}`, method: 'DELETE' }),
+    deleteTask: builder.mutation({
+      query: (id) => ({
+        url: `/tasks/${id}`,
+        method: 'DELETE',
+      }),
     }),
-    getTaskStats: builder.query({ query: () => '/tasks/stats' }),
+    getTaskStats: builder.query({
+      query: () => '/tasks/stats',
+    }),
     getTaskCompletionStats: builder.query({
       query: () => '/tasks/completion-stats',
     }),
-    updateProfile: builder.mutation<User, any>({
-      query: (formData) => ({
-        url: `/profile/upload`,
-        method: 'PUT',
-        body: formData,
-      }),
-    })
+    getTasksByStatus: builder.query({
+      query: (status) => `/tasks/status/${status}`,
+    }),
   }),
 });
 
+export const { useRegisterUserMutation, useLoginUserMutation } = authApi;
+
 export const {
-  useRegisterUserMutation,
-  useLoginUserMutation,
+  useGetAllUsersQuery,
+  useGetProfileQuery,
+  useUpdateProfileMutation,
+} = usersApi;
+
+export const {
+  useGetAllTasksQuery,
+  useGetTaskByIdQuery,
   useAddTaskMutation,
   useUpdateTaskMutation,
   useDeleteTaskMutation,
   useGetTaskStatsQuery,
   useGetTaskCompletionStatsQuery,
-  useGetAllUsersQuery,
-  useGetAllTasksQuery,
   useGetTasksByStatusQuery,
-  useGetTaskByIdQuery,
-  useGetProfileQuery,
-  useUpdateProfileMutation
-} = apiSlice;
+} = tasksApi;

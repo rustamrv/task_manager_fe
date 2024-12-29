@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../api';
+import { RootState } from '../../api/authReducer';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -9,12 +9,11 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   // Retrieve authentication state from Redux
-  const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated
-  );
+  const token = useSelector((state: RootState) => state.auth.token);
+
+  const isAuthenticated = !!token;
 
   if (!isAuthenticated) {
-    // If not authenticated, redirect to the login page
     return <Navigate to="/" replace />;
   }
 

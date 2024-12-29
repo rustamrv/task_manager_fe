@@ -1,98 +1,109 @@
-import React, { useState } from 'react';
-import ModalComponent from '@/components/ui/modalComponent';
-import { Button } from '@/components/ui/button';
+import React, { useRef, useState } from 'react';
 import { useDrag } from 'react-dnd';
-import DynamicForm from '../form/DynamicForm';
-import { Task } from '../../interfaces';
-import { useGetAllUsersQuery } from '../../api/apiSlice';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/Select';
+import ModalComponent from '@/components/ui/ModalComponent';
+import { Task } from '../../interfaces/Task';
+import {
+  useDeleteTaskMutation,
+  useGetAllUsersQuery,
+  useUpdateTaskMutation,
+} from '../../api/apiSlice';
+import { format } from 'date-fns';
+import { BackendError } from '../../interfaces/Types';
 
 interface TaskCardProps {
   task: Task;
-  onUpdate: (updatedTask: Task) => void;
-  onDelete: (id: string) => void;
+  refetch: () => void;
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({ task, onUpdate, onDelete }) => {
-  const [, dragRef] = useDrag(() => ({
+const formatDateToLocal = (date: string | Date) => {
+  const localDate = new Date(date);
+  const year = localDate.getFullYear();
+  const month = String(localDate.getMonth() + 1).padStart(2, '0');
+  const day = String(localDate.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const TaskCard: React.FC<TaskCardProps> = ({ task, refetch }) => {
+  const ref = useRef<HTMLDivElement>(null);
+
+  const [{ isDragging }, dragRef] = useDrag(() => ({
     type: 'TASK',
     item: { id: task.id, status: task.status },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
   }));
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { data: usersInit } = useGetAllUsersQuery();
-  const [users, setUsers] = useState(usersInit || []);
+  const [users] = useState(usersInit || []);
 
-  const handleUpdate = async (formData: any) => {
+  const [deleteTaskMutation] = useDeleteTaskMutation();
+  const [updateTaskMutation] = useUpdateTaskMutation();
+
+  const [formData, setFormData] = useState({
+    id: task.id,
+    title: task.title,
+    description: task.description,
+    dueDate: formatDateToLocal(task.dueDate),
+    status: task.status,
+    assignee: task.assignee,
+  });
+
+  const handleInputChange = (key: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      await onUpdate({ ...formData, id: task.id });
+      await updateTaskMutation({ id: formData.id, task: formData }).unwrap();
+      refetch();
       setIsEditModalOpen(false);
-    } catch (error: any) {
+    } catch (error_) {
+      const error = error_ as BackendError;
       console.error('Failed to update task:', error);
       setError(
-        error.data ? error.data.error : 'Failed to update the task. Try again.'
+        error?.data?.error || 'Failed to update the task. Try again.'
       );
     }
   };
 
-  const taskFields = [
-    {
-      name: 'title',
-      label: 'Title',
-      type: 'text',
-      value: task.title,
-      placeholder: 'Title',
-      required: true,
-    },
-    {
-      name: 'description',
-      label: 'Description',
-      type: 'text',
-      value: task.description,
-      placeholder: 'Description',
-      required: true,
-    },
-    {
-      name: 'dueDate',
-      label: 'Due Date',
-      type: 'date',
-      value: task.dueDate,
-      placeholder: 'Select a deadline',
-      required: true,
-    },
-    {
-      name: 'status',
-      label: 'Status',
-      type: 'select',
-      value: task.status,
-      options: ['to-do', 'in-progress', 'done'],
-      placeholder: 'Select a status',
-      required: true,
-    },
-    {
-      name: 'assignee',
-      label: 'Assignee',
-      type: 'select',
-      placeholder: 'Assignee',
-      value: task.assignee._id, 
-      options: users.map((user) => ({
-        label: user.username,
-        value: user._id,
-      })),
-      required: true,
-    },
-  ] as any;
+  const handleDeleteTask = async (id: string) => {
+    try {
+      await deleteTaskMutation(id);
+      refetch();
+      setIsDeleteModalOpen(false);
+    } catch (error) {
+      console.error('Failed to delete task:', error);
+    }
+  };
+
+  dragRef(ref);
 
   return (
     <div
-      ref={dragRef}
-      className="border rounded-lg p-4 shadow-sm flex flex-col gap-2"
+      ref={ref}
+      className={`border rounded-lg p-4 shadow-sm flex flex-col gap-2 transition-all ${
+        isDragging ? 'opacity-50' : ''
+      }`}
     >
       <h3 className="text-lg font-semibold">{task.title}</h3>
       <p className="text-sm text-gray-500">{task.description}</p>
       <p className="text-sm text-gray-500">
-        {new Date(task.dueDate).toLocaleDateString()}
+        {format(new Date(task.dueDate), 'dd/MM/yyyy')}
       </p>
       <p className="text-sm text-gray-500">{task.status}</p>
       <p className="text-sm text-gray-500">{task.assignee.username}</p>
@@ -115,13 +126,87 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onUpdate, onDelete }) => {
         title="Edit Task"
         description="Update the task details below."
       >
-        <DynamicForm
-          fields={taskFields}
-          onSubmit={handleUpdate}
-          onCancel={() => setIsEditModalOpen(false)}
-          submitLabel="Save"
-          error={error}
-        />
+        <form onSubmit={handleUpdate} className="flex flex-col gap-4">
+          <div>
+            <Label htmlFor="title">Title</Label>
+            <Input
+              type="text"
+              id="title"
+              value={formData.title}
+              onChange={(e) => handleInputChange('title', e.target.value)}
+              placeholder="Enter task title"
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="description">Description</Label>
+            <Input
+              type="text"
+              id="description"
+              value={formData.description}
+              onChange={(e) => handleInputChange('description', e.target.value)}
+              placeholder="Enter task description"
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="dueDate">Due Date</Label>
+            <Input
+              type="date"
+              id="dueDate"
+              value={formData.dueDate}
+              onChange={(e) => handleInputChange('dueDate', e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="status">Status</Label>
+            <Select
+              value={formData.status}
+              onValueChange={(value) => handleInputChange('status', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="to-do">To-do</SelectItem>
+                <SelectItem value="in-progress">In Progress</SelectItem>
+                <SelectItem value="done">Done</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="assignee">Assignee</Label>
+            <Select
+              value={formData.assignee._id}
+              onValueChange={(value) => handleInputChange('assignee', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select an assignee" />
+              </SelectTrigger>
+              <SelectContent>
+                {users.map((user) => (
+                  <SelectItem key={user._id} value={user._id}>
+                    {user.username}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setIsEditModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" variant="default">
+              Save
+            </Button>
+          </div>
+        </form>
       </ModalComponent>
 
       {/* Delete Modal */}
@@ -138,7 +223,10 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onUpdate, onDelete }) => {
           >
             Cancel
           </Button>
-          <Button variant="destructive" onClick={() => onDelete(task.id)}>
+          <Button
+            variant="destructive"
+            onClick={() => handleDeleteTask(task.id)}
+          >
             Delete
           </Button>
         </div>

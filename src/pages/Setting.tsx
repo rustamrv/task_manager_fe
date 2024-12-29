@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import Navbar from '@/components/navbar/Navbar';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 import { useUpdateProfileMutation } from '../api/apiSlice'; // Use the updated mutation
 
 const Settings: React.FC = () => {
-  const [profileData, setProfileData] = useState<{ username: string; image: File | null }>({
+  const [profileData, setProfileData] = useState<{
+    username: string;
+    image: File | null;
+  }>({
     username: '',
     image: null,
   });
@@ -51,7 +54,7 @@ const Settings: React.FC = () => {
   return (
     <section className="flex flex-col lg:flex-row min-h-screen p-8 gap-8">
       {/* Navbar */}
-      <Navbar className="border-2 border-gray-300 shadow-md rounded-lg lg:p-6 lg:mt-6 lg:mb-6 lg:ml-6 lg:h-[calc(100vh-64px)]" />
+      <Navbar className="border-2 border-gray-300 shadow-md rounded-lg lg:p-6 lg:mt-6 lg:mb-6 lg:ml-6 lg:h-[calc(100vh-64px)] p-4" />
 
       {/* Main Content */}
       <section className="flex-grow flex flex-col lg:ml-72 p-6 overflow-y-auto">
@@ -61,11 +64,7 @@ const Settings: React.FC = () => {
           {/* Profile Image Field */}
           <label className="flex flex-col gap-2">
             Profile Image
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-            />
+            <input type="file" accept="image/*" onChange={handleImageChange} />
             {previewImage && (
               <img
                 src={previewImage}

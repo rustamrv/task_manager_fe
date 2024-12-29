@@ -3,11 +3,13 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 import { useLoginUserMutation } from '../api/apiSlice';
 import { useDispatch } from 'react-redux';
-import { setToken } from '../api';
+import { setToken } from '../api/authReducer';
+import { Label } from '@/components/ui/label';
+import { BackendError } from '../interfaces/Types';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -48,12 +50,25 @@ const Login: React.FC = () => {
       } else {
         throw new Error('No token returned by the server.');
       }
-    } catch (error: any) {
+    } catch (error_) {
+      const error = error_ as BackendError;
       console.error('Login error:', error);
       setServerError(
         error?.data?.message || 'Failed to Login. Please try again.'
       );
     }
+  };
+
+  const renderError = () => {
+    if (errors.email) {
+      return <p className="text-red-500 text-sm">{errors.email.message}</p>;
+    }
+
+    if (errors.password) {
+      return <p className="text-red-500 text-sm">{errors.password.message}</p>;
+    }
+
+    return null;
   };
 
   return (
@@ -68,38 +83,32 @@ const Login: React.FC = () => {
       </div>
 
       {/* Form Section */}
-      <div className="flex flex-col justify-center items-center md:w-1/2 md:pl-12">
+      <div className="flex flex-col justify-center items-center w-full md:w-1/2 md:pl-12">
         <form
           className="flex flex-col gap-4 w-full max-w-md"
           onSubmit={handleSubmit(onSubmit)}
         >
           {/* Email Field */}
-          <label htmlFor="email" className="text-sm font-medium">
+          <Label htmlFor="email" className="text-sm font-medium">
             Email
-          </label>
+          </Label>
           <Input
             id="email"
             type="email"
             placeholder="Enter your email"
             {...register('email')}
           />
-          {errors.email && (
-            <p className="text-red-500 text-sm">{errors.email.message}</p>
-          )}
 
           {/* Password Field */}
-          <label htmlFor="password" className="text-sm font-medium">
+          <Label htmlFor="password" className="text-sm font-medium">
             Password
-          </label>
+          </Label>
           <Input
             id="password"
             type="password"
             placeholder="Enter your password"
             {...register('password')}
           />
-          {errors.password && (
-            <p className="text-red-500 text-sm">{errors.password.message}</p>
-          )}
 
           {/* Server Error */}
           {serverError && (
@@ -107,6 +116,9 @@ const Login: React.FC = () => {
               {serverError}
             </p>
           )}
+
+          {renderError()}
+
           <Button
             type="submit"
             className="w-full mt-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:ring-2 focus:ring-blue-300 disabled:opacity-50"
@@ -115,6 +127,7 @@ const Login: React.FC = () => {
             {isLoading ? 'Logging in...' : 'Login'}
           </Button>
         </form>
+
         <h2 className="mt-4 text-center text-sm">OR</h2>
 
         <Button

@@ -29,20 +29,25 @@ const TaskCompletionChart: React.FC = () => {
       </div>
     );
 
-  const chartData = data.reduce((acc: { [x: number]: any; date: any; }[], { _id, count }: any) => {
-    const { date, status } = _id;
-    const found = acc.find((item: { date: any; }) => item.date === date);
-    if (found) {
-      found[status] = count;
-    } else {
-      acc.push({ date, [status]: count });
-    }
-    return acc;
-  }, []);
+  const chartData = data.reduce(
+    (acc: { [x: number]: any; date: any }[], { _id, count }: any) => {
+      const { date, status } = _id;
+      const found = acc.find((item: { date: any }) => item.date === date);
+      if (found) {
+        found[status] = count;
+      } else {
+        acc.push({ date, [status]: count });
+      }
+      return acc;
+    },
+    []
+  );
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-lg border-t-4 border-green-500">
-      <h2 className="text-2xl font-bold mb-4 text-green-700">Task Completion Over Time</h2>
+      <h2 className="text-2xl font-bold mb-4 text-green-700">
+        Task Completion Over Time
+      </h2>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
