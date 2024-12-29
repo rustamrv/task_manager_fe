@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDrop } from 'react-dnd';
 import TaskCard from '@/components/taskCard/TaskCard';
-import { Task } from '../../interfaces/Task';
+import { Task } from '../../api/types/TaskTypes';
 
 interface TaskColumnProps {
   title: string;

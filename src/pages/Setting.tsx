@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import Navbar from '@/components/navbar/Navbar';
-import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { useUpdateProfileMutation } from '../api/apiSlice'; // Use the updated mutation
+import { useUpdateProfileMutation } from '../api/endpoints/UserApi';
 
 const Settings: React.FC = () => {
   const [profileData, setProfileData] = useState<{

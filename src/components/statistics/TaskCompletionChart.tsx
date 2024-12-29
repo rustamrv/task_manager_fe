@@ -1,5 +1,5 @@
 import React from 'react';
-import { useGetTaskCompletionStatsQuery } from '../../api/apiSlice';
+import { useGetTaskCompletionStatsQuery } from '../../api/ApiSlice';
 import {
   LineChart,
   Line,

@@ -11,14 +11,15 @@ import {
   SelectValue,
 } from '@/components/ui/Select';
 import ModalComponent from '@/components/ui/ModalComponent';
-import { Task } from '../../interfaces/Task';
-import {
-  useDeleteTaskMutation,
-  useGetAllUsersQuery,
-  useUpdateTaskMutation,
-} from '../../api/apiSlice';
+
 import { format } from 'date-fns';
 import { BackendError } from '../../interfaces/Types';
+import { Task } from '../../api/types/TaskTypes';
+import { useUsers } from '../../hooks/UseUsers';
+import {
+  useDeleteTaskMutation,
+  useUpdateTaskMutation,
+} from '../../api/endpoints/TaskApi';
 
 interface TaskCardProps {
   task: Task;
@@ -47,19 +48,17 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, refetch }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { data: usersInit } = useGetAllUsersQuery();
-  const [users] = useState(usersInit || []);
+  const { users } = useUsers();
 
   const [deleteTaskMutation] = useDeleteTaskMutation();
   const [updateTaskMutation] = useUpdateTaskMutation();
 
   const [formData, setFormData] = useState({
-    id: task.id,
     title: task.title,
     description: task.description,
     dueDate: formatDateToLocal(task.dueDate),
     status: task.status,
-    assignee: task.assignee,
+    assignee: task.assignee?._id,
   });
 
   const handleInputChange = (key: string, value: string) => {
@@ -69,15 +68,16 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, refetch }) => {
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await updateTaskMutation({ id: formData.id, task: formData }).unwrap();
+      await updateTaskMutation({
+        id: task.id,
+        task: formData,
+      }).unwrap();
       refetch();
       setIsEditModalOpen(false);
     } catch (error_) {
       const error = error_ as BackendError;
       console.error('Failed to update task:', error);
-      setError(
-        error?.data?.error || 'Failed to update the task. Try again.'
-      );
+      setError(error?.data?.error || 'Failed to update the task. Try again.');
     }
   };
 
@@ -178,7 +178,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, refetch }) => {
           <div>
             <Label htmlFor="assignee">Assignee</Label>
             <Select
-              value={formData.assignee._id}
+              value={formData.assignee}
               onValueChange={(value) => handleInputChange('assignee', value)}
             >
               <SelectTrigger>

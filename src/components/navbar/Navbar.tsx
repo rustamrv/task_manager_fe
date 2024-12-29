@@ -1,8 +1,8 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { useDispatch } from 'react-redux';
-import { clearToken } from '../../api/authReducer';
-import { useGetProfileQuery } from '../../api/apiSlice';
+import { clearToken } from '../../api/AuthReducer';
+import { useGetProfileQuery } from '../../api/endpoints/UserApi';
 
 interface NavbarProps {
   className?: string;

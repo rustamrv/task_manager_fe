@@ -7,12 +7,10 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Label } from '@/components/ui/label';
 
-import { useRegisterUserMutation } from '../api/apiSlice';
+import { useRegisterUserMutation } from '../api/endpoints/AuthApi';
 import { useDispatch } from 'react-redux';
-import { setToken } from '../api/authReducer';
+import { setToken } from '../api/AuthReducer';
 import { BackendError } from '../interfaces/Types';
-
-
 
 const registerSchema = z
   .object({

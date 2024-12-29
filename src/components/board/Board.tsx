@@ -12,13 +12,10 @@ import {
 } from '@/components/ui/Dialog';
 import { Button } from '@/components/ui/Button';
 
-import { Task } from '../../interfaces/Task';
 import {
   useAddTaskMutation,
-  useGetAllTasksQuery,
-  useGetAllUsersQuery,
   useUpdateTaskMutation,
-} from '../../api/apiSlice';
+} from '../../api/endpoints/TaskApi';
 import { Label } from '../ui/label';
 import { Input } from '../ui/Input';
 import {
@@ -29,22 +26,16 @@ import {
   SelectValue,
 } from '../ui/Select';
 import { CreateTaskError } from '../../interfaces/Types';
+import { useColumns } from '../../hooks/UseColumn';
+import { useUsers } from '../../hooks/UseUsers';
+import { Task } from '../../api/types/TaskTypes';
 
 const Board: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const {
-    data: columnsInit,
-    isLoading,
-    isError,
-    refetch,
-  } = useGetAllTasksQuery();
-  const { data: usersInit } = useGetAllUsersQuery();
   const [addTaskMutation] = useAddTaskMutation();
   const [updateTaskMutation] = useUpdateTaskMutation();
 
-  const [columns, setColumns] = useState(columnsInit || []);
-  const [users, setUsers] = useState(usersInit || []);
   const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
@@ -55,17 +46,9 @@ const Board: React.FC = () => {
     assignee: '',
   });
 
-  useEffect(() => {
-    if (columnsInit) {
-      setColumns(columnsInit);
-    }
-  }, [columnsInit]);
+  const { columns, isLoading, isError, refetch } = useColumns();
 
-  useEffect(() => {
-    if (usersInit) {
-      setUsers(usersInit);
-    }
-  }, [usersInit]);
+  const { users } = useUsers();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>

@@ -1,6 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { apiSlice, authApi, tasksApi, usersApi } from './apiSlice';
-import authReducer from './authSlice';
+import { apiSlice } from './ApiSlice';
+import authReducer from './AuthSlice';
+import { usersApi } from './endpoints/UserApi';
+import { tasksApi } from './endpoints/TaskApi';
+import { authApi } from './endpoints/AuthApi';
 
 // Store configuration
 export const store = configureStore({

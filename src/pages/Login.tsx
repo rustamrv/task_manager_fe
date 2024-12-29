@@ -5,9 +5,9 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { useLoginUserMutation } from '../api/apiSlice';
+import { useLoginUserMutation } from '../api/endpoints/AuthApi';
 import { useDispatch } from 'react-redux';
-import { setToken } from '../api/authReducer';
+import { setToken } from '../api/AuthReducer';
 import { Label } from '@/components/ui/label';
 import { BackendError } from '../interfaces/Types';
 

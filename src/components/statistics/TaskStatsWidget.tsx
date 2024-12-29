@@ -1,5 +1,5 @@
 import React from 'react';
-import { useGetTaskStatsQuery } from '../../api/apiSlice';
+import { useGetTaskStatsQuery } from '../../api/ApiSlice';
 
 const TaskStatsWidget: React.FC = () => {
   const { data, error, isLoading } = useGetTaskStatsQuery({});
