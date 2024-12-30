@@ -1,5 +1,5 @@
-import React from 'react';
-import { useGetTaskCompletionStatsQuery } from '../../api/ApiSlice';
+import React, { useEffect } from 'react';
+import { useGetTaskCompletionStatsQuery } from '../../api/endpoints/TaskApi';
 import {
   LineChart,
   Line,
@@ -12,7 +12,12 @@ import {
 } from 'recharts';
 
 const TaskCompletionChart: React.FC = () => {
-  const { data, error, isLoading } = useGetTaskCompletionStatsQuery({});
+  const { data, error, isLoading, refetch } = useGetTaskCompletionStatsQuery();
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
 
   if (isLoading)
     return (
@@ -28,6 +33,8 @@ const TaskCompletionChart: React.FC = () => {
         <p className="text-red-500">Error loading chart</p>
       </div>
     );
+
+    if (!data) return <div>No data available</div>
 
   const chartData = data.reduce(
     (acc: { [x: number]: any; date: any }[], { _id, count }: any) => {

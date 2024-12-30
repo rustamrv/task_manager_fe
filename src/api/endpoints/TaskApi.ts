@@ -1,5 +1,5 @@
 import { apiSlice } from '../ApiSlice';
-import { CreateTask, GetTask, Task, UpdateTask } from '../types/TaskTypes';
+import { CreateTask, GetTask, Task, TaskCompletionStatsResponse, TaskStatsResponse, UpdateTask } from '../types/TaskTypes';
 
 export const tasksApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -20,30 +20,26 @@ export const tasksApi = apiSlice.injectEndpoints({
         body: task,
       }),
     }),
-    deleteTask: builder.mutation({
+    deleteTask: builder.mutation<void, string>({
       query: (id: string) => ({
         url: `/tasks/${id}`,
         method: 'DELETE',
       }),
     }),
-    getTaskStats: builder.query({
+    getTaskStats: builder.query<TaskStatsResponse, void>({
       query: () => '/tasks/stats',
     }),
-    getTaskCompletionStats: builder.query({
+    getTaskCompletionStats: builder.query<TaskCompletionStatsResponse[], void>({
       query: () => '/tasks/completion-stats',
-    }),
-    getTasksByStatus: builder.query({
-      query: (status: string) => `/tasks/status/${status}`,
     }),
   }),
 });
 
 export const {
-  useGetAllTasksQuery, 
+  useGetAllTasksQuery,
   useAddTaskMutation,
   useUpdateTaskMutation,
   useDeleteTaskMutation,
   useGetTaskStatsQuery,
   useGetTaskCompletionStatsQuery,
-  useGetTasksByStatusQuery,
 } = tasksApi;

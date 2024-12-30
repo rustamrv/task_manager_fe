@@ -1,5 +1,5 @@
 import { apiSlice } from '../ApiSlice';
-import { User } from '../types/UserTypes';
+import { User, UpdateProfileResponse } from '../types/UserTypes';
 
 export const usersApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -9,7 +9,7 @@ export const usersApi = apiSlice.injectEndpoints({
     getProfile: builder.query<User, void>({
       query: () => 'profile',
     }),
-    updateProfile: builder.mutation({
+    updateProfile: builder.mutation<UpdateProfileResponse, FormData>({
       query: (formData) => ({
         url: 'profile/upload',
         method: 'PUT',

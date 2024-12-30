@@ -4,3 +4,8 @@ export interface User {
   email: string;
   profileImage: string;
 }
+
+export type UpdateProfileResponse = {
+  message: string;
+  profileImage: string;
+};

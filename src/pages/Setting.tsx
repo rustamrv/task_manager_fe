@@ -36,7 +36,7 @@ const Settings: React.FC = () => {
     e.preventDefault();
 
     const formData = new FormData();
-    formData.append('username', profileData.username);
+ 
     if (profileData.image) {
       formData.append('profileImage', profileData.image);
     }

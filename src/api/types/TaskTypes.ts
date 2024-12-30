@@ -27,3 +27,32 @@ export interface GetTask {
   title: string;
   tasks: Task[];
 }
+
+export interface CreateTaskRequest {
+  title: string;
+  description: string;
+  dueDate: string;
+  status: string;
+  assignee: string;
+}
+
+export interface UpdateTaskRequest {
+  title?: string;
+  description?: string;
+  dueDate?: string;
+  status?: 'to-do' | 'in-progress' | 'done';
+  assignee?: string;
+}
+
+export interface TaskStatsResponse {
+  totalTasks: number;
+  completedTasks: number;
+}
+
+export interface TaskCompletionStatsResponse {
+  _id: {
+    date: string;
+    status: string;
+  };
+  count: number;
+}
