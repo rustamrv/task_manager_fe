@@ -25,6 +25,7 @@ const Login: React.FC = () => {
     register,
     handleSubmit,
     formState: { errors },
+    setError,
   } = useForm<LoginFormInputs>({
     resolver: zodResolver(loginSchema),
   });
@@ -56,39 +57,31 @@ const Login: React.FC = () => {
       setServerError(
         error?.data?.message || 'Failed to Login. Please try again.'
       );
-    }
-  };
 
-  const renderError = () => {
-    if (errors.email) {
-      return <p className="text-red-500 text-sm">{errors.email.message}</p>;
+      if (error?.data?.message === 'Invalid credentials') {
+        setError('email', {
+          type: 'manual',
+          message: 'Invalid credentials',
+        });
+      }
     }
-
-    if (errors.password) {
-      return <p className="text-red-500 text-sm">{errors.password.message}</p>;
-    }
-
-    return null;
   };
 
   return (
-    <section className="flex flex-col md:flex-row items-center justify-center h-screen w-screen container mx-auto xl:px-24 px-4">
-      {/* Logo Section */}
-      <div className="flex justify-center items-center md:w-1/2">
+    <section className="flex flex-col md:flex-row items-center justify-center overflow-x-hidden md:justify-between w-full h-screen px-4 py-8">
+      <div className="w-full md:w-1/2 text-center px-4 mb-8 md:mb-0">
         <img
           src={logo}
           alt="Task Management"
-          className="w-3/4 max-w-xs md:max-w-sm lg:max-w-md object-contain"
+          className="w-3/4 max-w-xs md:max-w-sm lg:max-w-md mx-auto md:mx-0 max-w-full"
         />
       </div>
 
-      {/* Form Section */}
-      <div className="flex flex-col justify-center items-center w-full md:w-1/2 md:pl-12">
+      <div className="w-full md:w-1/2 px-4">
         <form
-          className="flex flex-col gap-4 w-full max-w-md"
+          className="flex flex-col gap-4 w-full max-w-md mx-auto md:mx-0"
           onSubmit={handleSubmit(onSubmit)}
         >
-          {/* Email Field */}
           <Label htmlFor="email" className="text-sm font-medium">
             Email
           </Label>
@@ -98,8 +91,10 @@ const Login: React.FC = () => {
             placeholder="Enter your email"
             {...register('email')}
           />
+          {errors.email && (
+            <p className="text-red-500 text-sm">{errors.email.message}</p>
+          )}
 
-          {/* Password Field */}
           <Label htmlFor="password" className="text-sm font-medium">
             Password
           </Label>
@@ -109,15 +104,15 @@ const Login: React.FC = () => {
             placeholder="Enter your password"
             {...register('password')}
           />
+          {errors.password && (
+            <p className="text-red-500 text-sm">{errors.password.message}</p>
+          )}
 
-          {/* Server Error */}
           {serverError && (
             <p className="text-red-600 text-center font-medium">
               {serverError}
             </p>
           )}
-
-          {renderError()}
 
           <Button
             type="submit"
@@ -129,14 +124,15 @@ const Login: React.FC = () => {
         </form>
 
         <h2 className="mt-4 text-center text-sm">OR</h2>
-
-        <Button
-          type="button"
-          className="w-full py-2 mt-4 bg-black text-white rounded-md hover:bg-gray-800 focus:ring-2 focus:ring-gray-300 disabled:opacity-50"
-          onClick={() => navigate('/register')}
-        >
-          Register
-        </Button>
+        <div className="flex flex-col gap-4 w-full max-w-md mx-auto md:mx-0">
+          <Button
+            type="button"
+            className="w-full py-2 mt-4 bg-black text-white rounded-md hover:bg-gray-800 focus:ring-2 focus:ring-gray-300 disabled:opacity-50"
+            onClick={() => navigate('/register')}
+          >
+            Register
+          </Button>
+        </div>
       </div>
     </section>
   );

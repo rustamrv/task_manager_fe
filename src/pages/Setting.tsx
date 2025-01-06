@@ -15,11 +15,6 @@ const Settings: React.FC = () => {
 
   const [updateProfile, { isLoading, isSuccess }] = useUpdateProfileMutation();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setProfileData((prev) => ({ ...prev, [name]: value }));
-  };
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     if (file) {
@@ -36,7 +31,7 @@ const Settings: React.FC = () => {
     e.preventDefault();
 
     const formData = new FormData();
- 
+
     if (profileData.image) {
       formData.append('profileImage', profileData.image);
     }

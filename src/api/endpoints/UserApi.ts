@@ -8,6 +8,7 @@ export const usersApi = apiSlice.injectEndpoints({
     }),
     getProfile: builder.query<User, void>({
       query: () => 'profile',
+      providesTags: ['Profile'],
     }),
     updateProfile: builder.mutation<UpdateProfileResponse, FormData>({
       query: (formData) => ({
@@ -15,6 +16,7 @@ export const usersApi = apiSlice.injectEndpoints({
         method: 'PUT',
         body: formData,
       }),
+      invalidatesTags: ['Profile'],
     }),
   }),
 });

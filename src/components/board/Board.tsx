@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import TaskColumn from '../taskColumn/TaskColumn';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
@@ -11,7 +11,6 @@ import {
   DialogDescription,
 } from '@/components/ui/Dialog';
 import { Button } from '@/components/ui/Button';
-
 import {
   useAddTaskMutation,
   useUpdateTaskMutation,
@@ -32,12 +31,7 @@ import { Task } from '../../api/types/TaskTypes';
 
 const Board: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  const [addTaskMutation] = useAddTaskMutation();
-  const [updateTaskMutation] = useUpdateTaskMutation();
-
   const [error, setError] = useState<string | null>(null);
-
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -47,8 +41,18 @@ const Board: React.FC = () => {
   });
 
   const { columns, isLoading, isError, refetch } = useColumns();
-
   const { users } = useUsers();
+  const [addTaskMutation] = useAddTaskMutation();
+  const [updateTaskMutation] = useUpdateTaskMutation();
+
+  // State for cards, synchronized with columns
+  const [cards, setCards] = useState([{}]);
+
+  useEffect(() => {
+    if (columns) {
+      setCards(columns);
+    }
+  }, [columns]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -83,18 +87,12 @@ const Board: React.FC = () => {
 
   const handleDropTask = async (task: Task, targetColumn: string) => {
     try {
-      let updateStatus = 'to-do';
-      switch (targetColumn) {
-        case 'To do':
-          updateStatus = 'to-do';
-          break;
-        case 'In progress':
-          updateStatus = 'in-progress';
-          break;
-        case 'Done':
-          updateStatus = 'done';
-          break;
-      }
+      const statusMap: Record<string, string> = {
+        'To do': 'to-do',
+        'In progress': 'in-progress',
+        Done: 'done',
+      };
+      const updateStatus = statusMap[targetColumn] || 'to-do';
 
       await updateTaskMutation({
         id: task.id,
@@ -107,6 +105,30 @@ const Board: React.FC = () => {
       console.error('Failed to move task:', error);
     }
   };
+
+  const moveCard = useCallback(
+    (dragIndex: number, hoverIndex: number, sourceStatus: string, targetStatus: string) => {
+      setCards((prevCards: any) => {
+        const sourceCards = [...prevCards[sourceStatus]];
+        const targetCards = [...prevCards[targetStatus]];
+        const [movedCard] = sourceCards.splice(dragIndex, 1);
+    
+        if (!movedCard) {
+          console.error("Attempted to move an undefined card");
+          return prevCards;
+        }
+    
+        targetCards.splice(hoverIndex, 0, movedCard);
+    
+        return {
+          ...prevCards,
+          [sourceStatus]: sourceCards,
+          [targetStatus]: targetCards,
+        };
+      });
+    },
+    []
+  );
 
   if (isLoading) return <p>Loading tasks...</p>;
   if (isError) return <p>Error loading tasks.</p>;
@@ -232,14 +254,14 @@ const Board: React.FC = () => {
       </div>
       <DndProvider backend={HTML5Backend}>
         <div className="flex flex-grow gap-4 overflow-y-auto">
-          {columns.map((column) => (
+          {Object.keys(cards).map((status: any) => (
             <TaskColumn
-              title={column.title}
-              tasks={column.tasks}
+              key={status}
+              title={status}
+              tasks={cards[status] as any}
               refetch={refetch}
-              onDropTask={(draggedTask) =>
-                handleDropTask(draggedTask, column.title)
-              }
+              moveCard={moveCard}
+              onDropTask={handleDropTask}
             />
           ))}
         </div>

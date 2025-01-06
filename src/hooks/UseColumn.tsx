@@ -1,20 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useGetAllTasksQuery } from '../api/endpoints/TaskApi';
+import { GetTask, Task } from 'src/api/types/TaskTypes';
 
 export const useColumns = () => {
-  const {
-    data: columnsInit,
-    isLoading,
-    isError,
-    refetch,
-  } = useGetAllTasksQuery();
-  const [columns, setColumns] = useState(columnsInit || []);
+  const { data, isLoading, isError, refetch } = useGetAllTasksQuery();
+  const [columns, setColumns] = useState<GetTask[]>(data || []);
 
   useEffect(() => {
-    if (columnsInit) {
-      setColumns(columnsInit);
+    if (data) {
+      setColumns(data);
     }
-  }, [columnsInit]);
+  }, [data]);
 
-  return { columns, isLoading, isError, refetch };
+  return { columns: columns || [], isLoading, isError, refetch };
 };

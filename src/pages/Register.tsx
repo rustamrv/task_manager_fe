@@ -93,9 +93,8 @@ const Register: React.FC = () => {
   };
 
   return (
-    <section className="flex flex-col md:flex-row items-center justify-center h-screen w-screen container mx-auto xl:px-24 px-4">
-      {/* Logo Section */}
-      <div className="flex justify-center items-center md:w-1/2">
+    <section className="flex flex-col md:flex-row items-center justify-center overflow-x-hidden md:justify-between w-full h-screen px-8 py-8">
+      <div className="w-full md:w-1/2 text-center px-4 mb-8 md:mb-0">
         <img
           src={logo}
           alt="Task Management"
@@ -172,14 +171,15 @@ const Register: React.FC = () => {
         </form>
 
         <h2 className="mt-4 text-center text-sm">OR</h2>
-
-        <Button
-          type="button"
-          className="w-full mt-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:ring-2 focus:ring-blue-300 disabled:opacity-50"
-          onClick={() => navigate('/')}
-        >
-          Login
-        </Button>
+        <div className="flex flex-col gap-4 w-full max-w-md">
+          <Button
+            type="button"
+            className="w-full mt-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:ring-2 focus:ring-blue-300 disabled:opacity-50"
+            onClick={() => navigate('/')}
+          >
+            Login
+          </Button>
+        </div>
       </div>
     </section>
   );

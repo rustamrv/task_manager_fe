@@ -24,8 +24,7 @@ export interface UpdateTask {
 }
 
 export interface GetTask {
-  title: string;
-  tasks: Task[];
+  [key: string]: Task[];
 }
 
 export interface CreateTaskRequest {

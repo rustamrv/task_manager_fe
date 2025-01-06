@@ -10,7 +10,7 @@ const TaskStatsWidget: React.FC = () => {
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading stats</div>;
-  if (!data) return <div>No data available</div>
+  if (!data) return <div>No data available</div>;
   const { totalTasks, completedTasks } = data;
 
   return (

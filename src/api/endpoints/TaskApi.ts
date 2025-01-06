@@ -1,5 +1,12 @@
 import { apiSlice } from '../ApiSlice';
-import { CreateTask, GetTask, Task, TaskCompletionStatsResponse, TaskStatsResponse, UpdateTask } from '../types/TaskTypes';
+import {
+  CreateTask,
+  GetTask,
+  Task,
+  TaskCompletionStatsResponse,
+  TaskStatsResponse,
+  UpdateTask,
+} from '../types/TaskTypes';
 
 export const tasksApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({

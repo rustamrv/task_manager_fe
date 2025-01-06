@@ -18,7 +18,6 @@ const TaskCompletionChart: React.FC = () => {
     refetch();
   }, [refetch]);
 
-
   if (isLoading)
     return (
       <div className="p-6 bg-gray-100 rounded-lg shadow-md text-center">
@@ -34,7 +33,7 @@ const TaskCompletionChart: React.FC = () => {
       </div>
     );
 
-    if (!data) return <div>No data available</div>
+  if (!data) return <div>No data available</div>;
 
   const chartData = data.reduce(
     (acc: { [x: number]: any; date: any }[], { _id, count }: any) => {

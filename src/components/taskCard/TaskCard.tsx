@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { useDrag } from 'react-dnd';
+import { DragPreviewImage, useDrag, useDrop, XYCoord } from 'react-dnd';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
@@ -23,6 +23,13 @@ import {
 
 interface TaskCardProps {
   task: Task;
+  index: number;
+  moveCard: (
+    dragIndex: number,
+    hoverIndex: number,
+    sourceStatus: string,
+    targetStatus: string
+  ) => void;
   refetch: () => void;
 }
 
@@ -34,16 +41,13 @@ const formatDateToLocal = (date: string | Date) => {
   return `${year}-${month}-${day}`;
 };
 
-const TaskCard: React.FC<TaskCardProps> = ({ task, refetch }) => {
+const TaskCard: React.FC<TaskCardProps> = ({
+  task,
+  index,
+  refetch,
+  moveCard,
+}) => {
   const ref = useRef<HTMLDivElement>(null);
-
-  const [{ isDragging }, dragRef] = useDrag(() => ({
-    type: 'TASK',
-    item: { id: task.id, status: task.status },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  }));
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -91,14 +95,54 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, refetch }) => {
     }
   };
 
-  dragRef(ref);
+  const [{ handlerId, isOver }, drop] = useDrop({
+    accept: 'TASK',
+    collect: (monitor) => ({
+      handlerId: monitor.getHandlerId(),
+      isOver: monitor.isOver(),
+    }),
+    hover: (draggedTask: any, monitor) => {
+      if (!ref.current) return;
+
+      const dragIndex = draggedTask.index;
+      const hoverIndex = index;
+      const sourceStatus = draggedTask.status;
+      const targetStatus = task.status;
+
+      if (dragIndex === hoverIndex && sourceStatus === targetStatus) return;
+
+      const hoverBoundingRect = ref.current.getBoundingClientRect();
+      const hoverMiddleY =
+        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      const clientOffset = monitor.getClientOffset();
+      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
+
+      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) return;
+      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
+
+      moveCard(dragIndex, hoverIndex, sourceStatus, targetStatus);
+      draggedTask.index = hoverIndex;
+      draggedTask.status = targetStatus;
+    },
+  });
+
+  const [{ isDragging }, dragRef] = useDrag(() => ({
+    type: 'TASK',
+    item: { type: 'TASK', id: task.id, status: task.status, index },
+    collect: (monitor) => ({
+      isDragging: !!monitor.isDragging(),
+    }),
+  }));
+
+  dragRef(drop(ref));
 
   return (
     <div
       ref={ref}
       className={`border rounded-lg p-4 shadow-sm flex flex-col gap-2 transition-all ${
-        isDragging ? 'opacity-50' : ''
+        isDragging ? 'opacity-50' : isOver ? 'bg-blue-100' : 'bg-white'
       }`}
+      data-handler-id={handlerId}
     >
       <h3 className="text-lg font-semibold">{task.title}</h3>
       <p className="text-sm text-gray-500">{task.description}</p>
