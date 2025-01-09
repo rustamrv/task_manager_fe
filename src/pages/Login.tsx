@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useLoginUserMutation } from '../api/endpoints/AuthApi';
 import { useDispatch } from 'react-redux';
 import { setToken } from '../api/AuthReducer';
-import { Label } from '@/components/ui/label';
+import { Label } from '@/components/ui/Label';
 import { BackendError } from '../interfaces/Types';
 
 const loginSchema = z.object({
@@ -34,9 +34,9 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const [loginUser, { isLoading, isSuccess, isError }] = useLoginUserMutation();
+  const [loginUser, { isLoading }] = useLoginUserMutation();
 
-  const onSubmit = async (data: LoginFormInputs) => {
+  const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
     setServerError(null);
     try {
       const response = await loginUser({

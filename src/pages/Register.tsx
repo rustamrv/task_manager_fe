@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { Label } from '@/components/ui/label';
+import { Label } from '@/components/ui/Label';
 
 import { useRegisterUserMutation } from '../api/endpoints/AuthApi';
 import { useDispatch } from 'react-redux';

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import TaskColumn from '../taskColumn/TaskColumn';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
@@ -11,11 +11,8 @@ import {
   DialogDescription,
 } from '@/components/ui/Dialog';
 import { Button } from '@/components/ui/Button';
-import {
-  useAddTaskMutation,
-  useUpdateTaskMutation,
-} from '../../api/endpoints/TaskApi';
-import { Label } from '../ui/label';
+import { useAddTaskMutation } from '../../api/endpoints/TaskApi';
+import { Label } from '../ui/Label';
 import { Input } from '../ui/Input';
 import {
   Select,
@@ -27,7 +24,6 @@ import {
 import { CreateTaskError } from '../../interfaces/Types';
 import { useColumns } from '../../hooks/UseColumn';
 import { useUsers } from '../../hooks/UseUsers';
-import { Task } from '../../api/types/TaskTypes';
 
 const Board: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -43,9 +39,7 @@ const Board: React.FC = () => {
   const { columns, isLoading, isError, refetch } = useColumns();
   const { users } = useUsers();
   const [addTaskMutation] = useAddTaskMutation();
-  const [updateTaskMutation] = useUpdateTaskMutation();
 
-  // State for cards, synchronized with columns
   const [cards, setCards] = useState([{}]);
 
   useEffect(() => {
@@ -85,65 +79,20 @@ const Board: React.FC = () => {
     }
   };
 
-  const handleDropTask = async (task: Task, targetColumn: string) => {
-    try {
-      const statusMap: Record<string, string> = {
-        'To do': 'to-do',
-        'In progress': 'in-progress',
-        Done: 'done',
-      };
-      const updateStatus = statusMap[targetColumn] || 'to-do';
-
-      await updateTaskMutation({
-        id: task.id,
-        task: {
-          status: updateStatus,
-        },
-      }).unwrap();
-      refetch();
-    } catch (error) {
-      console.error('Failed to move task:', error);
-    }
-  };
-
-  const moveCard = useCallback(
-    (dragIndex: number, hoverIndex: number, sourceStatus: string, targetStatus: string) => {
-      setCards((prevCards: any) => {
-        const sourceCards = [...prevCards[sourceStatus]];
-        const targetCards = [...prevCards[targetStatus]];
-        const [movedCard] = sourceCards.splice(dragIndex, 1);
-    
-        if (!movedCard) {
-          console.error("Attempted to move an undefined card");
-          return prevCards;
-        }
-    
-        targetCards.splice(hoverIndex, 0, movedCard);
-    
-        return {
-          ...prevCards,
-          [sourceStatus]: sourceCards,
-          [targetStatus]: targetCards,
-        };
-      });
-    },
-    []
-  );
-
   if (isLoading) return <p>Loading tasks...</p>;
   if (isError) return <p>Error loading tasks.</p>;
 
   return (
-    <section className="flex-grow flex flex-col lg:ml-72 p-6 overflow-y-auto">
-      <div className="flex justify-between items-center border-b border-gray-300 pb-4 mb-6">
-        <h1 className="text-2xl font-bold">Tasks</h1>
+    <section className="flex-grow flex flex-col lg:ml-72 p-6 w-full gap-6 lg:gap-8 overflow-y-auto">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-300 pb-4 mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold">Tasks</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-blue-500 text-white hover:bg-blue-600">
+            <Button className="mt-4 sm:mt-0 bg-blue-500 text-white hover:bg-blue-600">
               + Add New Task
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="w-full max-w-md p-4 sm:p-6 rounded-lg shadow-lg">
             <DialogHeader>
               <DialogTitle>Add New Task</DialogTitle>
               <DialogDescription>
@@ -162,6 +111,7 @@ const Board: React.FC = () => {
                   onChange={handleChange}
                   placeholder="Enter task title"
                   required
+                  className="w-full"
                 />
               </div>
 
@@ -175,6 +125,7 @@ const Board: React.FC = () => {
                   onChange={handleChange}
                   placeholder="Enter task description"
                   required
+                  className="w-full"
                 />
               </div>
 
@@ -187,6 +138,7 @@ const Board: React.FC = () => {
                   value={formData.dueDate}
                   onChange={handleChange}
                   required
+                  className="w-full"
                 />
               </div>
 
@@ -253,15 +205,13 @@ const Board: React.FC = () => {
         </Dialog>
       </div>
       <DndProvider backend={HTML5Backend}>
-        <div className="flex flex-grow gap-4 overflow-y-auto">
-          {Object.keys(cards).map((status: any) => (
+        <div className="flex flex-wrap gap-4 overflow-y-auto">
+          {Object.keys(cards).map((status: string) => (
             <TaskColumn
               key={status}
-              title={status}
-              tasks={cards[status] as any}
+              status={status}
+              tasks={cards}
               refetch={refetch}
-              moveCard={moveCard}
-              onDropTask={handleDropTask}
             />
           ))}
         </div>

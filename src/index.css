@@ -67,9 +67,6 @@ button:focus-visible {
   }
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -133,3 +130,7 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

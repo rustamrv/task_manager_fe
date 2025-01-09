@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { DragPreviewImage, useDrag, useDrop, XYCoord } from 'react-dnd';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Label } from '@/components/ui/label';
+import { Label } from '@/components/ui/Label';
 import {
   Select,
   SelectContent,
@@ -24,12 +24,15 @@ import {
 interface TaskCardProps {
   task: Task;
   index: number;
-  moveCard: (
+  status: string;
+  moveTask: (
     dragIndex: number,
     hoverIndex: number,
     sourceStatus: string,
-    targetStatus: string
+    targetStatus: string,
+    id: string
   ) => void;
+  revertTask: (dragId: string, sourceStatus: string) => void;
   refetch: () => void;
 }
 
@@ -44,8 +47,10 @@ const formatDateToLocal = (date: string | Date) => {
 const TaskCard: React.FC<TaskCardProps> = ({
   task,
   index,
+  status,
   refetch,
-  moveCard,
+  moveTask,
+  revertTask,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -87,7 +92,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
 
   const handleDeleteTask = async (id: string) => {
     try {
-      await deleteTaskMutation(id);
+      await deleteTaskMutation(id).unwrap();
       refetch();
       setIsDeleteModalOpen(false);
     } catch (error) {
@@ -95,19 +100,18 @@ const TaskCard: React.FC<TaskCardProps> = ({
     }
   };
 
-  const [{ handlerId, isOver }, drop] = useDrop({
+  const [{ handlerId }, drop] = useDrop({
     accept: 'TASK',
     collect: (monitor) => ({
       handlerId: monitor.getHandlerId(),
-      isOver: monitor.isOver(),
     }),
-    hover: (draggedTask: any, monitor) => {
+    hover: (item: any, monitor) => {
       if (!ref.current) return;
 
-      const dragIndex = draggedTask.index;
+      const dragIndex = item.index;
       const hoverIndex = index;
-      const sourceStatus = draggedTask.status;
-      const targetStatus = task.status;
+      const sourceStatus = item.status;
+      const targetStatus = status;
 
       if (dragIndex === hoverIndex && sourceStatus === targetStatus) return;
 
@@ -120,27 +124,33 @@ const TaskCard: React.FC<TaskCardProps> = ({
       if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) return;
       if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
 
-      moveCard(dragIndex, hoverIndex, sourceStatus, targetStatus);
-      draggedTask.index = hoverIndex;
-      draggedTask.status = targetStatus;
+      moveTask(dragIndex, hoverIndex, sourceStatus, targetStatus, task.id);
+      item.index = hoverIndex;
+      item.status = targetStatus;
     },
   });
 
-  const [{ isDragging }, dragRef] = useDrag(() => ({
+  const [{ isDragging }, drag] = useDrag({
     type: 'TASK',
-    item: { type: 'TASK', id: task.id, status: task.status, index },
+    item: { id: task.id, index, status },
     collect: (monitor) => ({
-      isDragging: !!monitor.isDragging(),
+      isDragging: monitor.isDragging(),
     }),
-  }));
+    end: (item, monitor) => {
+      const didDrop = monitor.didDrop();
+      if (!didDrop) {
+        revertTask(item.id, status);
+      }
+    },
+  });
 
-  dragRef(drop(ref));
+  drag(drop(ref));
 
   return (
     <div
       ref={ref}
       className={`border rounded-lg p-4 shadow-sm flex flex-col gap-2 transition-all ${
-        isDragging ? 'opacity-50' : isOver ? 'bg-blue-100' : 'bg-white'
+        isDragging ? 'opacity-50' : 'bg-white'
       }`}
       data-handler-id={handlerId}
     >
@@ -150,7 +160,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
         {format(new Date(task.dueDate), 'dd/MM/yyyy')}
       </p>
       <p className="text-sm text-gray-500">{task.status}</p>
-      <p className="text-sm text-gray-500">{task.assignee.username}</p>
+      <p className="text-sm text-gray-500">{task.assignee?.username}</p>
       <div className="flex gap-2">
         <Button variant="default" onClick={() => setIsEditModalOpen(true)}>
           Edit
@@ -163,7 +173,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
         </Button>
       </div>
 
-      {/* Edit Modal */}
       <ModalComponent
         isOpen={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
@@ -253,7 +262,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
         </form>
       </ModalComponent>
 
-      {/* Delete Modal */}
       <ModalComponent
         isOpen={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}

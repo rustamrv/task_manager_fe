@@ -2,7 +2,7 @@ export interface Task {
   id: string;
   title: string;
   description: string;
-  dueDate: any;
+  dueDate: string;
   status: string;
   assignee: { _id: string; username: string; email: string };
 }
