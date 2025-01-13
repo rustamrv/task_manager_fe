@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { TAGS } from './constants/Tags';
 
 // Base API configuration
 export const apiSlice = createApi({
@@ -13,6 +14,6 @@ export const apiSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Profile'],
+  tagTypes: [TAGS.PROFILE, TAGS.TASKS],
   endpoints: () => ({}),
 });

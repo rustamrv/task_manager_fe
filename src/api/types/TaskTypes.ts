@@ -1,57 +1,61 @@
-export interface Task {
+export type Task = {
   id: string;
   title: string;
   description: string;
   dueDate: string;
   status: string;
   assignee: { _id: string; username: string; email: string };
-}
+};
 
-export interface CreateTask {
+export type CreateTask = {
   title: string;
   description: string;
   dueDate: string;
   status: string;
   assignee: string;
-}
+};
 
-export interface UpdateTask {
+export type UpdateTask = {
   title?: string;
   description?: string;
   dueDate?: string;
   status?: string;
   assignee?: string;
-}
+};
 
-export interface GetTask {
+export type GetTask = {
   [key: string]: Task[];
-}
+};
 
-export interface CreateTaskRequest {
+export type CreateTaskRequest = {
   title: string;
   description: string;
   dueDate: string;
   status: string;
   assignee: string;
-}
+};
 
-export interface UpdateTaskRequest {
+export type UpdateTaskRequest = {
   title?: string;
   description?: string;
   dueDate?: string;
   status?: 'to-do' | 'in-progress' | 'done';
   assignee?: string;
-}
+};
 
-export interface TaskStatsResponse {
+export type TaskStatsResponse = {
   totalTasks: number;
   completedTasks: number;
-}
+};
 
-export interface TaskCompletionStatsResponse {
+export type TaskCompletionStatsResponse = {
   _id: {
     date: string;
     status: string;
   };
   count: number;
-}
+};
+
+export type DraggedTask = Task & {
+  index: number;
+};

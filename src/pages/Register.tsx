@@ -2,31 +2,17 @@ import React, { useState } from 'react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
-import { Label } from '@/components/ui/Label';
-
-import { useRegisterUserMutation } from '../api/endpoints/AuthApi';
 import { useDispatch } from 'react-redux';
-import { setToken } from '../api/AuthReducer';
-import { BackendError } from '../interfaces/Types';
+import { useNavigate } from 'react-router-dom';
+import { Input } from '@components/ui/Input';
+import { Button } from '@components/ui/Button';
+import { Label } from '@components/ui/Label';
 
-const registerSchema = z
-  .object({
-    username: z.string().min(3, 'Username must be at least 3 characters'),
-    email: z.string().email('Invalid email address'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z
-      .string()
-      .min(6, 'Password must be at least 6 characters'),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords must match',
-    path: ['confirmPassword'],
-  });
-
-type RegisterFormInputs = z.infer<typeof registerSchema>;
+import { useRegisterUserMutation } from '@api/endpoints/AuthApi';
+import { setToken } from '@api/AuthReducer';
+import { BackendError } from '../interfaces/Interface';
+import { registerSchema } from '@utils/validates/register-login';
+import { RegisterFormInputs } from '@utils/validates/types/register-login.type';
 
 const Register: React.FC = () => {
   const logo = '/images/task-management.svg';

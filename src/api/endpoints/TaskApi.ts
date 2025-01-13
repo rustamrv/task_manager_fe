@@ -7,11 +7,13 @@ import {
   TaskStatsResponse,
   UpdateTask,
 } from '../types/TaskTypes';
+import { TAGS } from '../constants/Tags';
 
 export const tasksApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getAllTasks: builder.query<GetTask[], void>({
+    getAllTasks: builder.query<GetTask, void>({
       query: () => '/tasks',
+      providesTags: [TAGS.TASKS],
     }),
     addTask: builder.mutation<Task, CreateTask>({
       query: (task: CreateTask) => ({
@@ -19,6 +21,44 @@ export const tasksApi = apiSlice.injectEndpoints({
         method: 'POST',
         body: task,
       }),
+      invalidatesTags: [TAGS.TASKS],
+      async onQueryStarted(task, { dispatch, queryFulfilled }) {
+        const tempId = `temp-${Date.now()}`;
+
+        const tempTask: Task = {
+          id: tempId,
+          title: task.title,
+          description: task.description,
+          dueDate: task.dueDate,
+          status: task.status,
+          assignee: {
+            _id: task.assignee,
+            username: 'Temporary Username',
+            email: 'temp@example.com',
+          },
+        };
+
+        const patchResult = dispatch(
+          tasksApi.util.updateQueryData('getAllTasks', undefined, (draft) => {
+            draft.tasks.push({ ...tempTask });
+          })
+        );
+
+        try {
+          const { data } = await queryFulfilled;
+
+          dispatch(
+            tasksApi.util.updateQueryData('getAllTasks', undefined, (draft) => {
+              const index = draft.tasks.findIndex((t) => t.id === tempId);
+              if (index !== -1) {
+                draft.tasks[index] = data;
+              }
+            })
+          );
+        } catch {
+          patchResult.undo();
+        }
+      },
     }),
     updateTask: builder.mutation<Task, { id: string; task: UpdateTask }>({
       query: ({ id, task }: { id: string; task: UpdateTask }) => ({
@@ -26,12 +66,57 @@ export const tasksApi = apiSlice.injectEndpoints({
         method: 'PUT',
         body: task,
       }),
+      invalidatesTags: [TAGS.TASKS],
+      // Optimistic Update
+      async onQueryStarted({ id, task }, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          tasksApi.util.updateQueryData('getAllTasks', undefined, (draft) => {
+            console.log('draft', draft.tasks);
+            if (!draft?.tasks || !Array.isArray(draft.tasks)) {
+              return;
+            }
+
+            const index = draft?.tasks?.findIndex((t) => t.id === id);
+            if (index !== -1) {
+              draft.tasks[index] = {
+                ...draft?.tasks[index],
+                ...task,
+                assignee: {
+                  _id: task.assignee,
+                  username: 'Temporary Username',
+                  email: 'temp@example.com',
+                },
+              } as Task;
+            }
+          })
+        );
+
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
     }),
     deleteTask: builder.mutation<void, string>({
       query: (id: string) => ({
         url: `/tasks/${id}`,
         method: 'DELETE',
       }),
+      invalidatesTags: [TAGS.TASKS],
+      // Optimistic Update
+      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          tasksApi.util.updateQueryData('getAllTasks', undefined, (draft) => {
+            draft.tasks = draft.tasks.filter((task) => task.id !== id);
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
     }),
     getTaskStats: builder.query<TaskStatsResponse, void>({
       query: () => '/tasks/stats',

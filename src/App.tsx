@@ -11,7 +11,7 @@ import Register from './pages/Register';
 const App: React.FC = () => {
   return (
     <Router>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col w-full h-screen overflow-hidden">
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/register" element={<Register />} />

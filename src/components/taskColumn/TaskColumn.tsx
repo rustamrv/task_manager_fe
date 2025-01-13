@@ -1,109 +1,114 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDrop } from 'react-dnd';
-import TaskCard from '@/components/taskCard/TaskCard';
-import { GetTask, Task } from '../../api/types/TaskTypes';
-import { useUpdateTaskMutation } from '../../api/endpoints/TaskApi';
+import TaskCard from '../taskCard/TaskCard';
+import { useUpdateTaskMutation } from '@api/endpoints/TaskApi';
+import { DraggedTask, GetTask, Task } from '@api/types/TaskTypes';
+import TaskPreview from '@components/taskPreview/TaskPreview';
 
 interface TaskColumnProps {
   status: string;
-  tasks: GetTask[];
+  tasks: GetTask;
   refetch: () => void;
 }
 
 const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
-  const [localTasks, setLocalTasks] = useState(tasks) as any;
+  const [localTasks, setTasks] = useState<GetTask>(tasks);
 
   const [updateTaskMutation] = useUpdateTaskMutation();
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [hoverTask, setHoverTask] = useState<DraggedTask | null>(null); // Task for preview
 
+  // Sync localTasks with tasks
   useEffect(() => {
-    setLocalTasks(tasks);
+    setTasks(tasks);
   }, [tasks]);
 
-  const handleDropTask = async (task: Task, newStatus: string) => {
+  const handleDropTask = async (
+    task: DraggedTask,
+    newIndex: number,
+    newStatus: string
+  ) => {
+    setTasks((prev) => {
+      const updatedTasks = { ...prev };
+
+      const sourceCards = [...(updatedTasks[task.status] || [])];
+      const targetCards = [...(updatedTasks[newStatus] || [])];
+
+      if (task.index < 0 || task.index >= sourceCards.length) return prev;
+
+      // Remove the task from the source column
+      const [movedCard] = sourceCards.splice(task.index, 1);
+
+      if (newStatus === task.status) {
+        // Reorder within the same column
+        sourceCards.splice(newIndex, 0, movedCard);
+        updatedTasks[task.status] = sourceCards;
+      } else {
+        // Move to a different column
+        const updatedCard = { ...movedCard, status: newStatus };
+        targetCards.splice(newIndex, 0, updatedCard);
+        updatedTasks[task.status] = sourceCards;
+        updatedTasks[newStatus] = targetCards;
+      }
+
+      return updatedTasks;
+    });
+
     try {
       await updateTaskMutation({
         id: task.id,
         task: { status: newStatus },
       }).unwrap();
-      refetch();
     } catch (error) {
       console.error('Error updating task status:', error);
-      refetch();
     }
-  };
-
-  const moveTask = (
-    dragIndex: number,
-    hoverIndex: number,
-    sourceStatus: string,
-    targetStatus: string
-  ) => {
-    setLocalTasks((prevTasks: any) => {
-      const updatedTasks = { ...prevTasks };
-
-      const sourceCards = [...(updatedTasks[sourceStatus] || [])];
-      const targetCards = [...(updatedTasks[targetStatus] || [])];
-
-      const [movedCard] = sourceCards.splice(dragIndex, 1);
-
-      if (sourceStatus === targetStatus) {
-        sourceCards.splice(hoverIndex, 0, movedCard);
-        updatedTasks[sourceStatus] = sourceCards;
-      } else {
-        const updatedCard = { ...movedCard, status: targetStatus };
-        targetCards.push(updatedCard);
-
-        updatedTasks[sourceStatus] = sourceCards;
-        updatedTasks[targetStatus] = targetCards;
-
-        handleDropTask(movedCard, targetStatus);
-      }
-
-      return updatedTasks;
-    });
   };
 
   const [{ isOver }, drop] = useDrop({
     accept: 'TASK',
-    drop: (item: any) => {
-      const movedTask = { ...item };
-      if (movedTask.status !== status) {
-        handleDropTask(movedTask, status);
-      }
+    drop: (item: DraggedTask, monitor) => {
+      if (monitor.didDrop()) return;
+      if (!hoverTask) return;
+
+      handleDropTask(item, hoverTask.index, status);
+      setHoverTask(null);
+    },
+    hover: (item: DraggedTask, monitor) => {
+      const hoverPosition = monitor.getClientOffset();
+      if (!hoverPosition || !containerRef.current) return;
+
+      const hoverBoundingRect = containerRef.current.getBoundingClientRect();
+      const hoverClientY = hoverPosition.y - hoverBoundingRect.top;
+
+      const hoverIndex = Math.min(
+        Math.max(0, Math.floor(hoverClientY / 50)),
+        localTasks[status]?.length || 0
+      );
+
+      const dragIndex = item.index;
+      const sourceStatus = item.status;
+
+      if (dragIndex === hoverIndex && sourceStatus === status) return;
+
+      setHoverTask({ ...item, index: hoverIndex });
     },
     collect: (monitor) => ({
       isOver: monitor.isOver(),
     }),
   });
 
-  const revertTask = (taskId: string, originalStatus: string) => {
-    setLocalTasks((prevTasks: any) => {
-      const updatedTasks = { ...prevTasks };
-
-      Object.keys(updatedTasks).forEach((status) => {
-        const taskIndex = updatedTasks[status]?.findIndex(
-          (task: any) => task.id === taskId
-        );
-
-        if (taskIndex !== -1) {
-          const [revertedTask] = updatedTasks[status].splice(taskIndex, 1);
-
-          if (!updatedTasks[originalStatus]) {
-            updatedTasks[originalStatus] = [];
-          }
-
-          revertedTask.status = originalStatus;
-          updatedTasks[originalStatus].push(revertedTask);
-        }
-      });
-
-      return updatedTasks;
-    });
-  };
+  useEffect(() => {
+    if (!isOver) {
+      setHoverTask(null);
+    }
+  }, [isOver]);
 
   return (
     <div
-      ref={drop}
+      ref={(node) => {
+        drop(node);
+        containerRef.current = node;
+      }}
       className={`flex flex-col gap-4 border rounded-lg p-4 shadow-md min-w-[150px] ${
         isOver ? 'bg-blue-100' : 'bg-gray-50'
       }`}
@@ -115,20 +120,21 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
         </span>
       </header>
       <div className="flex flex-col gap-4">
-        {localTasks[status]?.length > 0 ? (
-          localTasks[status].map((task: Task, index: number) => (
+        {localTasks[status]?.map((task, index) => (
+          <React.Fragment key={task.id}>
+            {hoverTask && hoverTask.index === index && (
+              <TaskPreview task={hoverTask} />
+            )}
             <TaskCard
-              key={index}
+              key={task.id}
               task={task}
               index={index}
-              status={status}
-              moveTask={moveTask}
-              revertTask={revertTask}
               refetch={refetch}
             />
-          ))
-        ) : (
-          <p className="text-sm text-gray-500">No tasks</p>
+          </React.Fragment>
+        ))}
+        {hoverTask && hoverTask.index === localTasks[status]?.length && (
+          <TaskPreview task={hoverTask} />
         )}
       </div>
     </div>

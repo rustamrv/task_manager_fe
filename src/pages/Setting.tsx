@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import Navbar from '@/components/navbar/Navbar';
-import { Button } from '@/components/ui/Button';
-import { useUpdateProfileMutation } from '../api/endpoints/UserApi';
+import Navbar from '@components/navbar/Navbar';
+import { Button } from '@components/ui/Button';
+import { useUpdateProfileMutation } from '@api/endpoints/UserApi';
 
 const Settings: React.FC = () => {
   const [profileData, setProfileData] = useState<{
@@ -45,10 +45,15 @@ const Settings: React.FC = () => {
     }
   };
 
+  const handleReset = () => {
+    setProfileData({ username: '', image: null });
+    setPreviewImage(null);
+  };
+
   return (
     <section className="flex flex-col lg:flex-row min-h-screen p-8 gap-8">
       {/* Navbar */}
-      <Navbar className="border-2 border-gray-300 shadow-md rounded-lg lg:p-6 lg:mt-6 lg:mb-6 lg:ml-6 lg:h-[calc(100vh-64px)] p-4" />
+      <Navbar />
 
       {/* Main Content */}
       <section className="flex-grow flex flex-col lg:ml-72 p-6 overflow-y-auto">
@@ -70,13 +75,15 @@ const Settings: React.FC = () => {
 
           {/* Submit Button */}
           <div className="flex justify-end gap-4">
-            <Button
-              variant="secondary"
-              type="button"
-              onClick={() => setProfileData({ username: '', image: null })}
-            >
-              Reset
-            </Button>
+            {previewImage && (
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={() => handleReset()}
+              >
+                Reset
+              </Button>
+            )}
             <Button variant="default" type="submit" disabled={isLoading}>
               {isLoading ? 'Updating...' : 'Update Profile'}
             </Button>

@@ -1,22 +1,16 @@
 import React, { useState } from 'react';
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
-import { useLoginUserMutation } from '../api/endpoints/AuthApi';
+import { Input } from '@components/ui/Input';
+import { Button } from '@components/ui/Button';
+import { useLoginUserMutation } from '@api/endpoints/AuthApi';
 import { useDispatch } from 'react-redux';
-import { setToken } from '../api/AuthReducer';
-import { Label } from '@/components/ui/Label';
-import { BackendError } from '../interfaces/Types';
-
-const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-});
-
-type LoginFormInputs = z.infer<typeof loginSchema>;
+import { setToken } from '@api/AuthReducer';
+import { Label } from '@components/ui/Label';
+import { BackendError } from '../interfaces/Interface';
+import { loginSchema } from '@utils/validates/register-login';
+import { LoginFormInputs } from '@utils/validates/types/register-login.type';
 
 const Login: React.FC = () => {
   const logo = '/images/task-management.svg';
@@ -91,9 +85,11 @@ const Login: React.FC = () => {
             placeholder="Enter your email"
             {...register('email')}
           />
-          {errors.email && (
-            <p className="text-red-500 text-sm">{errors.email.message}</p>
-          )}
+          <div className="h-6">
+            {errors.email && (
+              <p className="text-red-500 text-sm">{errors.email.message}</p>
+            )}
+          </div>
 
           <Label htmlFor="password" className="text-sm font-medium">
             Password
@@ -104,12 +100,14 @@ const Login: React.FC = () => {
             placeholder="Enter your password"
             {...register('password')}
           />
-          {errors.password && (
-            <p className="text-red-500 text-sm">{errors.password.message}</p>
-          )}
+          <div className="h-6">
+            {errors.password && (
+              <p className="text-red-500 text-sm">{errors.password.message}</p>
+            )}
+          </div>
 
           {serverError && (
-            <p className="text-red-600 text-center font-medium">
+            <p className="text-red-500 text-center font-medium">
               {serverError}
             </p>
           )}
