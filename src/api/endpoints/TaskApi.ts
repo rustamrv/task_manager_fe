@@ -22,9 +22,9 @@ export const tasksApi = apiSlice.injectEndpoints({
         body: task,
       }),
       invalidatesTags: [TAGS.TASKS],
+      // Use optimistic update
       async onQueryStarted(task, { dispatch, queryFulfilled }) {
         const tempId = `temp-${Date.now()}`;
-
         const tempTask: Task = {
           id: tempId,
           title: task.title,
@@ -46,7 +46,6 @@ export const tasksApi = apiSlice.injectEndpoints({
 
         try {
           const { data } = await queryFulfilled;
-
           dispatch(
             tasksApi.util.updateQueryData('getAllTasks', undefined, (draft) => {
               const index = draft.tasks.findIndex((t) => t.id === tempId);
@@ -67,6 +66,39 @@ export const tasksApi = apiSlice.injectEndpoints({
         body: task,
       }),
       invalidatesTags: [TAGS.TASKS],
+      // Optimistic update
+      async onQueryStarted({ id, task }, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          tasksApi.util.updateQueryData('getAllTasks', undefined, (draft) => {
+            const index = draft.tasks.findIndex((t) => t.id === id);
+            if (index !== -1) {
+              draft.tasks[index] = {
+                ...draft.tasks[index],
+                ...task,
+                assignee: task.assignee
+                  ? typeof task.assignee === 'string'
+                    ? {
+                        _id: task.assignee,
+                        username: 'Temporary Username',
+                        email: 'temp@example.com',
+                      }
+                    : task.assignee
+                  : {
+                      _id: 'unknown',
+                      username: 'Unknown User',
+                      email: 'unknown@example.com',
+                    },
+              };
+            }
+          })
+        );
+
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
     }),
     deleteTask: builder.mutation<void, string>({
       query: (id: string) => ({
@@ -74,7 +106,7 @@ export const tasksApi = apiSlice.injectEndpoints({
         method: 'DELETE',
       }),
       invalidatesTags: [TAGS.TASKS],
-      // Optimistic Update
+      // Optimistic update
       async onQueryStarted(id, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           tasksApi.util.updateQueryData('getAllTasks', undefined, (draft) => {

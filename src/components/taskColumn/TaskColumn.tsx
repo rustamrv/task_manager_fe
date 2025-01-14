@@ -12,7 +12,7 @@ interface TaskColumnProps {
 }
 
 const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
-  const [localTasks, setTasks] = useState<GetTask>(tasks); 
+  const [localTasks, setTasks] = useState<GetTask>(tasks);
 
   const [updateTaskMutation] = useUpdateTaskMutation();
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -70,7 +70,7 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
       if (item.status !== status) {
         handleDropTask(item, status);
       }
-      
+
       updateTask(item, hoverTask.index, status);
       setHoverTask(null);
     },
@@ -78,33 +78,26 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
       const hoverPosition = monitor.getClientOffset();
 
       if (!hoverPosition || !containerRef.current) return;
-      const hoverBoundingRect = containerRef.current?.getBoundingClientRect();
 
-      const dragIndex = item.index;
-      const sourceStatus = item.status;
-      const targetStatus = status;
+      const hoverBoundingRect = containerRef.current.getBoundingClientRect();
 
-      // Позиция мыши относительно верхней границы колонки
-      const clientOffset = monitor.getClientOffset();
-      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
+      // Position of the mouse relative to the top of the column
+      const hoverClientY = hoverPosition.y - hoverBoundingRect.top;
 
-      // Средняя высота задачи в колонке
-      const hoverMiddleY =
-        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      // Dynamic task height (passed from state or props)
+      const taskHeight = 50; // Default to 50px if not set
 
-      // Рассчитываем индекс задачи для hover
+      // Calculate hover index
       const hoverIndex = Math.min(
-        Math.max(0, Math.floor(hoverClientY / 50)), // 50 - высота одной задачи
-        localTasks[status]?.length || 0
+        Math.max(0, Math.floor(hoverClientY / taskHeight)),
+        localTasks[status]?.length || 0 // Clamp within valid task indices
       );
 
-      // Проверяем, нужно ли обновлять hoverTask
-      if (dragIndex === hoverIndex && sourceStatus === targetStatus) return;
+      // Avoid unnecessary updates if the hover index hasn't changed
+      if (hoverTask?.index === hoverIndex && hoverTask?.status === status)
+        return;
 
-      // Избегаем обновлений, если курсор находится выше или ниже области задачи
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) return;
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
-      // Обновляем превью
+      // Update hover task
       setHoverTask({ ...item, index: hoverIndex });
     },
     collect: (monitor) => ({
@@ -120,7 +113,7 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
 
   useEffect(() => {
     setTasks(tasks);
-  } , [tasks]); 
+  }, [tasks]);
 
   return (
     <div
