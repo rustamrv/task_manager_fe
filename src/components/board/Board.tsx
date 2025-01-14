@@ -37,7 +37,7 @@ const Board: React.FC = () => {
             <TaskColumn
               key={index}
               status={status}
-              tasks={columns}
+              tasks={cards}
               refetch={refetch}
             />
           ))}

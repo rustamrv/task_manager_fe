@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useDrop } from 'react-dnd';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useDrop, XYCoord } from 'react-dnd';
 import TaskCard from '../taskCard/TaskCard';
 import { useUpdateTaskMutation } from '@api/endpoints/TaskApi';
 import { DraggedTask, GetTask, Task } from '@api/types/TaskTypes';
@@ -12,18 +12,25 @@ interface TaskColumnProps {
 }
 
 const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
-  const [localTasks, setTasks] = useState<GetTask>(tasks);
+  const [localTasks, setTasks] = useState<GetTask>(tasks); 
 
   const [updateTaskMutation] = useUpdateTaskMutation();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [hoverTask, setHoverTask] = useState<DraggedTask | null>(null); // Task for preview
 
-  // Sync localTasks with tasks
-  useEffect(() => {
-    setTasks(tasks);
-  }, [tasks]);
+  const handleDropTask = async (task: DraggedTask, newStatus: string) => {
+    try {
+      await updateTaskMutation({
+        id: task.id,
+        task: { status: newStatus },
+      }).unwrap();
+    } catch (error) {
+      console.error('Error updating task status:', error);
+      refetch();
+    }
+  };
 
-  const handleDropTask = async (
+  const updateTask = async (
     task: DraggedTask,
     newIndex: number,
     newStatus: string
@@ -53,15 +60,6 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
 
       return updatedTasks;
     });
-
-    try {
-      await updateTaskMutation({
-        id: task.id,
-        task: { status: newStatus },
-      }).unwrap();
-    } catch (error) {
-      console.error('Error updating task status:', error);
-    }
   };
 
   const [{ isOver }, drop] = useDrop({
@@ -70,26 +68,44 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
       if (monitor.didDrop()) return;
       if (!hoverTask) return;
 
-      handleDropTask(item, hoverTask.index, status);
+      if (item.status !== status) {
+        handleDropTask(item, status);
+      }
+      
+      updateTask(item, hoverTask.index, status);
       setHoverTask(null);
     },
     hover: (item: DraggedTask, monitor) => {
       const hoverPosition = monitor.getClientOffset();
+
       if (!hoverPosition || !containerRef.current) return;
-
-      const hoverBoundingRect = containerRef.current.getBoundingClientRect();
-      const hoverClientY = hoverPosition.y - hoverBoundingRect.top;
-
-      const hoverIndex = Math.min(
-        Math.max(0, Math.floor(hoverClientY / 50)),
-        localTasks[status]?.length || 0
-      );
+      const hoverBoundingRect = containerRef.current?.getBoundingClientRect();
 
       const dragIndex = item.index;
       const sourceStatus = item.status;
+      const targetStatus = status;
 
-      if (dragIndex === hoverIndex && sourceStatus === status) return;
+      // Позиция мыши относительно верхней границы колонки
+      const clientOffset = monitor.getClientOffset();
+      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
 
+      // Средняя высота задачи в колонке
+      const hoverMiddleY =
+        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+
+      // Рассчитываем индекс задачи для hover
+      const hoverIndex = Math.min(
+        Math.max(0, Math.floor(hoverClientY / 50)), // 50 - высота одной задачи
+        localTasks[status]?.length || 0
+      );
+
+      // Проверяем, нужно ли обновлять hoverTask
+      if (dragIndex === hoverIndex && sourceStatus === targetStatus) return;
+
+      // Избегаем обновлений, если курсор находится выше или ниже области задачи
+      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) return;
+      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
+      // Обновляем превью
       setHoverTask({ ...item, index: hoverIndex });
     },
     collect: (monitor) => ({
@@ -102,6 +118,10 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
       setHoverTask(null);
     }
   }, [isOver]);
+
+  useEffect(() => {
+    setTasks(tasks);
+  } , [tasks]); 
 
   return (
     <div
@@ -119,7 +139,7 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
           {localTasks[status]?.length || 0}
         </span>
       </header>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 relative">
         {localTasks[status]?.map((task, index) => (
           <React.Fragment key={task.id}>
             {hoverTask && hoverTask.index === index && (
