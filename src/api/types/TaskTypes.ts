@@ -21,6 +21,7 @@ export type UpdateTask = {
   dueDate?: string;
   status?: string;
   assignee?: string;
+  position?: number;
 };
 
 export type GetTask = {

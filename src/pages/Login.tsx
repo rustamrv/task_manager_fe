@@ -30,6 +30,11 @@ const Login: React.FC = () => {
 
   const [loginUser, { isLoading }] = useLoginUserMutation();
 
+  const clearErrorsOnChange = (field: keyof LoginFormInputs) => {
+    setError(field, { type: 'manual', message: undefined });
+    setServerError(null);
+  };
+
   const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
     setServerError(null);
     try {
@@ -84,6 +89,7 @@ const Login: React.FC = () => {
             type="email"
             placeholder="Enter your email"
             {...register('email')}
+            onChange={() => clearErrorsOnChange('email')}
           />
           <div className="h-6">
             {errors.email && (
@@ -99,6 +105,7 @@ const Login: React.FC = () => {
             type="password"
             placeholder="Enter your password"
             {...register('password')}
+            onChange={() => clearErrorsOnChange('password')}
           />
           <div className="h-6">
             {errors.password && (

@@ -22,11 +22,10 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
     try {
       await updateTaskMutation({
         id: task.id,
-        task: { status: newStatus },
-      }).unwrap();
+        task: { status: newStatus, position: hoverTask?.index },
+      });
     } catch (error) {
       console.error('Error updating task status:', error);
-      refetch();
     }
   };
 
