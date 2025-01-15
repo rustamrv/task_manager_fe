@@ -67,9 +67,7 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
       if (monitor.didDrop()) return;
       if (!hoverTask) return;
 
-      if (item.status !== status) {
-        handleDropTask(item, status);
-      }
+      handleDropTask(item, status);
 
       updateTask(item, hoverTask.index, status);
       setHoverTask(null);
@@ -121,7 +119,7 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
         drop(node);
         containerRef.current = node;
       }}
-      className={`flex flex-col gap-4 border rounded-lg p-4 shadow-md min-w-[150px] ${
+      className={`flex flex-col gap-4 border rounded-lg p-4 shadow-md ${
         isOver ? 'bg-blue-100' : 'bg-gray-50'
       }`}
     >

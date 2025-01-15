@@ -1,5 +1,10 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
 
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -7,14 +12,33 @@ import ProtectedRoute from './components/login/ProtectedRoute';
 import TaskReport from './pages/TaskReport';
 import Settings from './pages/Setting';
 import Register from './pages/Register';
+import { useSelector } from 'react-redux';
+import { RootState } from '@api/Store';
 
 const App: React.FC = () => {
+  const token = useSelector((state: RootState) => state.auth.token);
+  const isAuthenticated = !!token;
+
   return (
     <Router>
       <div className="flex flex-col w-full h-screen overflow-hidden">
         <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route
+            path="/"
+            element={
+              isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              isAuthenticated ? (
+                <Navigate to="/dashboard" replace />
+              ) : (
+                <Register />
+              )
+            }
+          />
           <Route
             path="/dashboard"
             element={

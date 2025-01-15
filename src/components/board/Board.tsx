@@ -15,8 +15,8 @@ const Board: React.FC = () => {
   if (isError) return <p>Error loading tasks.</p>;
 
   return (
-    <section className="flex-grow flex flex-col lg:ml-72 p-6 w-full gap-6 lg:gap-8 overflow-y-auto">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-300 pb-4 mb-6">
+    <section className="flex-grow flex flex-col p-6 w-full gap-6 lg:gap-8 overflow-y-auto">
+      <div className="flex flex-col sm:flex-col justify-between items-start sm:items-center border-b border-gray-300 pb-4 mb-6">
         <h1 className="text-xl sm:text-2xl font-bold">Tasks</h1>
         <Button
           onClick={() => setIsDialogOpen(true)}
@@ -32,7 +32,7 @@ const Board: React.FC = () => {
       />
 
       <DndProvider backend={HTML5Backend}>
-        <div className="flex flex-wrap gap-4 overflow-y-auto">
+        <div className="flex  gap-4 overflow-y-auto">
           {Object.keys(cards).map((status: string, index: number) => (
             <TaskColumn
               key={index}

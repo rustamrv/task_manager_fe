@@ -122,9 +122,11 @@ export const tasksApi = apiSlice.injectEndpoints({
     }),
     getTaskStats: builder.query<TaskStatsResponse, void>({
       query: () => '/tasks/stats',
+      providesTags: [TAGS.TASKS],
     }),
     getTaskCompletionStats: builder.query<TaskCompletionStatsResponse[], void>({
       query: () => '/tasks/completion-stats',
+      providesTags: [TAGS.TASKS],
     }),
   }),
 });
