@@ -1,3 +1,4 @@
+import { TAGS } from '@api/constants/Tags';
 import { apiSlice } from '../ApiSlice';
 import { User, UpdateProfileResponse } from '../types/UserTypes';
 
@@ -8,7 +9,7 @@ export const usersApi = apiSlice.injectEndpoints({
     }),
     getProfile: builder.query<User, void>({
       query: () => 'profile',
-      providesTags: ['Profile'],
+      providesTags: [TAGS.PROFILE],
     }),
     updateProfile: builder.mutation<UpdateProfileResponse, FormData>({
       query: (formData) => ({
@@ -16,7 +17,7 @@ export const usersApi = apiSlice.injectEndpoints({
         method: 'PUT',
         body: formData,
       }),
-      invalidatesTags: ['Profile'],
+      invalidatesTags: [TAGS.PROFILE],
     }),
   }),
 });

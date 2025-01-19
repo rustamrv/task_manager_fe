@@ -1,6 +1,6 @@
 import React from 'react';
 import { Task } from '@api/types/TaskTypes';
-import { formatDateToLocal } from '@utils/date/format-date';
+import { formatDateToLocal } from '@utils/date/FormDate';
 
 interface TaskPreviewProps {
   task: Task;

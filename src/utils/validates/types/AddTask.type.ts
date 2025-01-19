@@ -1,4 +1,4 @@
 import { z } from 'zod';
-import { addTaskSchema } from '../add-task';
+import { addTaskSchema } from '../AddTask';
 
 export type AddTaskFormInputs = z.infer<typeof addTaskSchema>;

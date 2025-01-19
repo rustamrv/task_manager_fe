@@ -109,9 +109,11 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
     }
   }, [isOver]);
 
+  const memoizedTasks = useMemo(() => tasks, [tasks]);
+
   useEffect(() => {
-    setTasks(tasks);
-  }, [tasks]);
+    setTasks(memoizedTasks);
+  }, [memoizedTasks]);
 
   return (
     <div

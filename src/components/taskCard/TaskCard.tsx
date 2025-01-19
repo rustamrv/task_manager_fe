@@ -3,7 +3,7 @@ import { useDrag, useDrop } from 'react-dnd';
 import { Button } from '@components/ui/Button';
 import { Task } from '../../api/types/TaskTypes';
 import EditTaskForm from '../forms/EditTaskForm';
-import { formatDateToLocal } from '@utils/date/format-date';
+import { formatDateToLocal } from '@utils/date/FormDate';
 import DeleteTaskForm from '@components/forms/DeleteTaskForm';
 
 interface TaskCardProps {

@@ -12,7 +12,7 @@ import {
   Line,
   LineChart,
 } from 'recharts';
-import { processTaskCompletionData } from '@utils/statistics/statistics';
+import { processTaskCompletionData } from '@utils/statistics/Statistics';
 
 const TaskCompletionReport: React.FC = () => {
   const { data, error, isLoading, refetch } = useGetTaskCompletionStatsQuery();

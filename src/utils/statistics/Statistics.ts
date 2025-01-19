@@ -1,5 +1,5 @@
 import { TaskCompletionStatsResponse } from '@api/types/TaskTypes';
-import { ChartData } from 'src/interfaces/statistics';
+import { ChartData } from 'src/interfaces/Statistics';
 
 export const processTaskCompletionData = (
   data: TaskCompletionStatsResponse[]

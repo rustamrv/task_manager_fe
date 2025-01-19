@@ -15,7 +15,7 @@ const TaskReport: React.FC = () => {
       <Navbar />
 
       {/* Main Content */}
-      <div className="flex-1 sm:p-6 lg:p-8 lg:ml-72 overflow-auto">
+      <div className="flex-1 sm:p-6 lg:p-8 lg:ml-12">
         <Suspense fallback={<div>Loading Task Stats Widget...</div>}>
           <TaskStatsWidget />
         </Suspense>

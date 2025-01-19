@@ -11,14 +11,14 @@ import {
   SelectValue,
 } from '../ui/Select';
 import { useUsers } from '../../hooks/UseUsers';
-import { TaskError } from '../../interfaces/Interface';
+import { TaskError } from '../../interfaces/Errors';
 import ModalComponent from '../ui/ModalComponent';
 import { Task } from '@api/types/TaskTypes';
 import { useUpdateTaskMutation } from '@api/endpoints/TaskApi';
-import { formatDateToLocal } from '@utils/date/format-date';
+import { formatDateToLocal } from '@utils/date/FormDate';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { editTaskSchema } from '@utils/validates/edit-task';
-import { EditTaskFormInputs } from '@utils/validates/types/edit-task.type';
+import { editTaskSchema } from '@utils/validates/EditTask';
+import { EditTaskFormInputs } from '@utils/validates/types/EditTask.type';
 
 interface EditTaskFormProps {
   task: Task;
@@ -67,7 +67,7 @@ const EditTaskForm: React.FC<EditTaskFormProps> = ({
       const backendErrors = error?.data?.errors || [];
 
       if (backendErrors.length > 0) {
-        backendErrors.forEach((err: any) => {
+        backendErrors.forEach((err) => {
           setError(err.field as keyof typeof formData, {
             type: 'server',
             message: err.msg,

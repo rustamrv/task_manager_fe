@@ -56,7 +56,7 @@ const Settings: React.FC = () => {
       <Navbar />
 
       {/* Main Content */}
-      <section className="flex-grow flex flex-col lg:ml-72 p-6 overflow-y-auto">
+      <section className="flex-grow flex flex-col lg:ml-12 p-6 overflow-y-auto">
         <h1 className="text-2xl font-bold mb-6">Settings</h1>
 
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>

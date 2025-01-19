@@ -20,20 +20,18 @@ import {
 import { useUsers } from '../../hooks/UseUsers';
 import { useAddTaskMutation } from '@api/endpoints/TaskApi';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { TaskError } from 'src/interfaces/Interface';
-import { addTaskSchema } from '@utils/validates/add-task';
-import { AddTaskFormInputs } from '@utils/validates/types/add-task.type';
+import { TaskError } from 'src/interfaces/Errors';
+import { addTaskSchema } from '@utils/validates/AddTask';
+import { AddTaskFormInputs } from '@utils/validates/types/AddTask.type';
 
 interface AddTaskFormProps {
   isDialogOpen: boolean;
   setIsDialogOpen: (open: boolean) => void;
-  refetch: () => void;
 }
 
 const AddTaskForm: React.FC<AddTaskFormProps> = ({
   isDialogOpen,
   setIsDialogOpen,
-  refetch,
 }) => {
   const { users } = useUsers();
   const [addTaskMutation] = useAddTaskMutation();
@@ -52,7 +50,6 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
   const onSubmit = async (data: AddTaskFormInputs) => {
     try {
       await addTaskMutation(data).unwrap();
-      await refetch();
       setIsDialogOpen(false);
       reset();
     } catch (error_) {

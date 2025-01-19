@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import StorageService from '@utils/storage/storageService';
 
 interface AuthState {
   token: string | null;
@@ -6,8 +7,8 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  token: localStorage.getItem('token') || null,
-  isAuthenticated: !!localStorage.getItem('token'),
+  token: StorageService.getToken() || null,
+  isAuthenticated: !!StorageService.getToken(),
 };
 
 const authSlice = createSlice({
@@ -17,16 +18,15 @@ const authSlice = createSlice({
     setToken: (state, action: PayloadAction<string>) => {
       state.token = action.payload;
       state.isAuthenticated = true;
-      localStorage.setItem('token', action.payload);
+      StorageService.setToken(action.payload);
     },
     clearToken: (state) => {
       state.token = null;
       state.isAuthenticated = false;
-      localStorage.removeItem('token');
+      StorageService.removeToken();
     },
   },
 });
 
 export const { setToken, clearToken } = authSlice.actions;
-
 export default authSlice.reducer;
