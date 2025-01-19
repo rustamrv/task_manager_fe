@@ -21,7 +21,7 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <div className="flex flex-col w-full h-screen overflow-hidden">
+      <div className="flex flex-col w-full h-screen">
         <Routes>
           <Route
             path="/"

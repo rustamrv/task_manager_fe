@@ -9,13 +9,12 @@ import TaskColumn from '../taskColumn/TaskColumn';
 const Board: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { columns, isLoading, isError, refetch } = useColumns();
-  const cards = useMemo(() => columns || [{}], [columns]);
 
   if (isLoading) return <p>Loading tasks...</p>;
   if (isError) return <p>Error loading tasks.</p>;
 
   return (
-    <section className="flex-grow flex flex-col p-6 w-full gap-6 lg:gap-8 overflow-y-auto">
+    <section className="flex-grow flex flex-col w-full gap-6 lg:gap-8 overflow-y-auto lg:ml-72">
       <div className="flex flex-col sm:flex-col justify-between items-start sm:items-center border-b border-gray-300 pb-4 mb-6">
         <h1 className="text-xl sm:text-2xl font-bold">Tasks</h1>
         <Button
@@ -32,12 +31,12 @@ const Board: React.FC = () => {
       />
 
       <DndProvider backend={HTML5Backend}>
-        <div className="flex  gap-4 overflow-y-auto">
-          {Object.keys(cards).map((status: string, index: number) => (
+        <div className="flex  gap-6 overflow-x-auto w-full">
+          {Object.keys(columns).map((status: string, index: number) => (
             <TaskColumn
               key={index}
               status={status}
-              tasks={cards}
+              tasks={columns}
               refetch={refetch}
             />
           ))}

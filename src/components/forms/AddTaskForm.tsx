@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import {
   Dialog,
   DialogTrigger,
@@ -19,7 +19,10 @@ import {
 } from '@components/ui/Select';
 import { useUsers } from '../../hooks/UseUsers';
 import { useAddTaskMutation } from '@api/endpoints/TaskApi';
-import { CreateTaskError } from '../../interfaces/Interface';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { TaskError } from 'src/interfaces/Interface';
+import { addTaskSchema } from '@utils/validates/add-task';
+import { AddTaskFormInputs } from '@utils/validates/types/add-task.type';
 
 interface AddTaskFormProps {
   isDialogOpen: boolean;
@@ -32,45 +35,43 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
   setIsDialogOpen,
   refetch,
 }) => {
-  const [error, setError] = useState<string | null>(null);
   const { users } = useUsers();
   const [addTaskMutation] = useAddTaskMutation();
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    dueDate: '',
-    status: '',
-    assignee: '',
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    setError,
+    reset,
+    formState: { errors },
+  } = useForm<AddTaskFormInputs>({
+    resolver: zodResolver(addTaskSchema),
   });
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleAddTask = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const onSubmit = async (data: AddTaskFormInputs) => {
     try {
-      await addTaskMutation(formData).unwrap();
+      await addTaskMutation(data).unwrap();
       await refetch();
       setIsDialogOpen(false);
-      setFormData({
-        title: '',
-        description: '',
-        dueDate: '',
-        status: '',
-        assignee: '',
-      });
+      reset();
     } catch (error_) {
-      const error = error_ as CreateTaskError;
+      const error = error_ as TaskError;
       const backendErrors = error?.data?.errors || [];
-      const errorMessage = backendErrors.map((err: any) => err.msg).join(', ');
-      setError(errorMessage || 'Failed to add a task. Try again.');
+
+      if (backendErrors.length > 0) {
+        backendErrors.forEach((err) => {
+          setError(err.field as keyof typeof data, {
+            type: 'server',
+            message: err.msg,
+          });
+        });
+      } else {
+        setError('root', {
+          type: 'server',
+          message: 'Failed to add task. Try again.',
+        });
+      }
     }
   };
 
@@ -81,61 +82,51 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
         <DialogHeader>
           <DialogTitle>Add New Task</DialogTitle>
           <DialogDescription>
-            Fill in the details to add a new task.
+            Fill in the details to create a new task
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleAddTask} className="flex flex-col gap-4">
-          {/* Поля формы */}
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div>
             <Label htmlFor="title">Title</Label>
             <Input
-              type="text"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="Enter task title"
-              required
+              {...register('title')}
+              placeholder="Enter title"
               className="w-full"
             />
+            {errors.title && (
+              <p className="text-red-500">{errors.title.message}</p>
+            )}
           </div>
+
           <div>
             <Label htmlFor="description">Description</Label>
             <Input
-              type="text"
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Enter task description"
-              required
+              {...register('description')}
+              placeholder="Enter description"
               className="w-full"
             />
+            {errors.description && (
+              <p className="text-red-500">{errors.description.message}</p>
+            )}
           </div>
+
           <div>
             <Label htmlFor="dueDate">Due Date</Label>
-            <Input
-              type="date"
-              id="dueDate"
-              name="dueDate"
-              value={formData.dueDate}
-              onChange={handleChange}
-              required
-              className="w-full"
-            />
+            <Input type="date" {...register('dueDate')} className="w-full" />
+            {errors.dueDate && (
+              <p className="text-red-500">{errors.dueDate.message}</p>
+            )}
           </div>
+
           <div>
             <Label htmlFor="status">Status</Label>
             <Select
-              value={formData.status}
               onValueChange={(value) =>
-                handleChange({
-                  target: { name: 'status', value },
-                } as React.ChangeEvent<HTMLInputElement>)
+                setValue('status', value as 'to-do' | 'in-progress' | 'done')
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a status" />
+                <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="to-do">To-do</SelectItem>
@@ -143,19 +134,16 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
                 <SelectItem value="done">Done</SelectItem>
               </SelectContent>
             </Select>
+            {errors.status && (
+              <p className="text-red-500">{errors.status.message}</p>
+            )}
           </div>
+
           <div>
             <Label htmlFor="assignee">Assignee</Label>
-            <Select
-              value={formData.assignee}
-              onValueChange={(value) =>
-                handleChange({
-                  target: { name: 'assignee', value },
-                } as React.ChangeEvent<HTMLInputElement>)
-              }
-            >
+            <Select onValueChange={(value) => setValue('assignee', value)}>
               <SelectTrigger>
-                <SelectValue placeholder="Select a user" />
+                <SelectValue placeholder="Select an assignee" />
               </SelectTrigger>
               <SelectContent>
                 {users.map((user) => (
@@ -165,8 +153,13 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
                 ))}
               </SelectContent>
             </Select>
+            {errors.assignee && (
+              <p className="text-red-500">{errors.assignee.message}</p>
+            )}
           </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+
+          {errors.root && <p className="text-red-500">{errors.root.message}</p>}
+
           <div className="flex justify-end gap-4">
             <Button
               type="button"

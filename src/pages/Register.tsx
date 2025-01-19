@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
@@ -15,8 +14,6 @@ import { registerSchema } from '@utils/validates/register-login';
 import { RegisterFormInputs } from '@utils/validates/types/register-login.type';
 
 const Register: React.FC = () => {
-  const logo = '/images/task-management.svg';
-
   const {
     register,
     handleSubmit,
@@ -26,8 +23,7 @@ const Register: React.FC = () => {
   });
 
   const navigate = useNavigate();
-  const [registerUser, { isLoading, isSuccess, isError }] =
-    useRegisterUserMutation();
+  const [registerUser, { isLoading }] = useRegisterUserMutation();
 
   const [serverError, setServerError] = useState<string | null>(null);
   const dispatch = useDispatch();
@@ -59,42 +55,21 @@ const Register: React.FC = () => {
     }
   };
 
-  // Create a prioritized error message logic
-  const renderError = () => {
-    if (errors.confirmPassword) {
-      return (
-        <p className="text-red-500 text-sm">{errors.confirmPassword.message}</p>
-      );
-    }
-    if (errors.password) {
-      return <p className="text-red-500 text-sm">{errors.password.message}</p>;
-    }
-    if (errors.email) {
-      return <p className="text-red-500 text-sm">{errors.email.message}</p>;
-    }
-    if (errors.username) {
-      return <p className="text-red-500 text-sm">{errors.username.message}</p>;
-    }
-    return null;
-  };
-
   return (
-    <section className="flex flex-col md:flex-row items-center justify-center overflow-x-hidden md:justify-between w-full h-screen px-8 py-8">
-      <div className="w-full md:w-1/2 text-center px-4 mb-8 md:mb-0">
+    <section className="flex flex-col md:flex-row items-center justify-center overflow-x-hidden md:justify-between w-full min-h-screen lg:ml-72 px-4">
+      <div className="w-full md:w-1/2 text-center mb-8 md:mb-0">
         <img
-          src={logo}
+          src="/images/task-management.svg"
           alt="Task Management"
-          className="w-3/4 max-w-xs md:max-w-sm lg:max-w-md object-contain"
+          className="w-3/4 max-w-xs md:max-w-sm lg:max-w-md mx-auto"
         />
       </div>
 
-      {/* Form Section */}
-      <div className="flex flex-col justify-center items-center w-full md:w-1/2 md:pl-12">
+      <div className="w-full md:w-1/2">
         <form
-          className="flex flex-col gap-4 w-full max-w-md"
+          className="flex flex-col gap-y-3 w-full max-w-md mx-auto bg-white p-6 shadow-md rounded-lg"
           onSubmit={handleSubmit(onSubmit)}
         >
-          {/* Username Field */}
           <Label htmlFor="username" className="text-sm font-medium">
             Username
           </Label>
@@ -104,8 +79,12 @@ const Register: React.FC = () => {
             placeholder="Enter your username"
             {...register('username')}
           />
+          <div className="h-6">
+            {errors.username && (
+              <p className="text-red-500 text-sm">{errors.username.message}</p>
+            )}
+          </div>
 
-          {/* Email Field */}
           <Label htmlFor="email" className="text-sm font-medium">
             Email
           </Label>
@@ -115,8 +94,12 @@ const Register: React.FC = () => {
             placeholder="Enter your email"
             {...register('email')}
           />
+          <div className="h-6">
+            {errors.email && (
+              <p className="text-red-500 text-sm">{errors.email.message}</p>
+            )}
+          </div>
 
-          {/* Password Field */}
           <Label htmlFor="password" className="text-sm font-medium">
             Password
           </Label>
@@ -126,8 +109,12 @@ const Register: React.FC = () => {
             placeholder="Enter your password"
             {...register('password')}
           />
+          <div className="h-6">
+            {errors.password && (
+              <p className="text-red-500 text-sm">{errors.password.message}</p>
+            )}
+          </div>
 
-          {/* Confirm Password Field */}
           <Label htmlFor="confirmPassword" className="text-sm font-medium">
             Confirm Password
           </Label>
@@ -137,15 +124,19 @@ const Register: React.FC = () => {
             placeholder="Confirm your password"
             {...register('confirmPassword')}
           />
+          <div className="h-6">
+            {errors.confirmPassword && (
+              <p className="text-red-500 text-sm">
+                {errors.confirmPassword.message}
+              </p>
+            )}
+          </div>
 
-          {/* Server Error */}
-          {serverError && (
-            <p className="text-red-600 text-center font-medium">
-              {serverError}
-            </p>
-          )}
-
-          {renderError()}
+          <div className="h-6 text-center">
+            {serverError && (
+              <p className="text-red-500 font-medium">{serverError}</p>
+            )}
+          </div>
 
           <Button
             type="submit"
@@ -155,8 +146,7 @@ const Register: React.FC = () => {
             {isLoading ? 'Registering...' : 'Register'}
           </Button>
         </form>
-
-        <h2 className="mt-4 text-center text-sm">OR</h2>
+ 
         <div className="flex flex-col gap-4 w-full max-w-md">
           <Button
             type="button"

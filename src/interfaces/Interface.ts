@@ -1,6 +1,6 @@
-export interface CreateTaskError {
+export interface TaskError {
   data?: {
-    errors?: { msg: string }[];
+    errors?: { field: string; msg: string }[];
   };
 }
 

@@ -15,16 +15,14 @@ const TaskReport: React.FC = () => {
       <Navbar />
 
       {/* Main Content */}
-      <section className="flex-grow flex flex-col p-4 lg:ml-72 lg:p-6 overflow-y-auto">
-        <div className="p-6">
-          <Suspense fallback={<div>Loading Task Stats Widget...</div>}>
-            <TaskStatsWidget />
-          </Suspense>
-          <Suspense fallback={<div>Loading Task Completion Chart...</div>}>
-            <TaskCompletionChart />
-          </Suspense>
-        </div>
-      </section>
+      <div className="flex-1 sm:p-6 lg:p-8 lg:ml-72 overflow-auto">
+        <Suspense fallback={<div>Loading Task Stats Widget...</div>}>
+          <TaskStatsWidget />
+        </Suspense>
+        <Suspense fallback={<div>Loading Task Completion Chart...</div>}>
+          <TaskCompletionChart />
+        </Suspense>
+      </div>
     </section>
   );
 };

@@ -119,7 +119,7 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
         drop(node);
         containerRef.current = node;
       }}
-      className={`flex flex-col gap-4 border rounded-lg p-4 shadow-md ${
+      className={`flex flex-col gap-4 border rounded-lg p-4 shadow-md overflow-x-auto overflow-y-auto w-full ${
         isOver ? 'bg-blue-100' : 'bg-gray-50'
       }`}
     >
@@ -129,7 +129,7 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
           {localTasks[status]?.length || 0}
         </span>
       </header>
-      <div className="flex flex-col gap-4 relative">
+      <div className="flex flex-col gap-4">
         {localTasks[status]?.map((task, index) => (
           <React.Fragment key={task.id}>
             {hoverTask && hoverTask.index === index && (

@@ -13,8 +13,6 @@ import { loginSchema } from '@utils/validates/register-login';
 import { LoginFormInputs } from '@utils/validates/types/register-login.type';
 
 const Login: React.FC = () => {
-  const logo = '/images/task-management.svg';
-
   const {
     register,
     handleSubmit,
@@ -67,18 +65,18 @@ const Login: React.FC = () => {
   };
 
   return (
-    <section className="flex flex-col md:flex-row items-center justify-center overflow-x-hidden md:justify-between w-full h-screen px-4 py-8">
-      <div className="w-full md:w-1/2 text-center px-4 mb-8 md:mb-0">
+    <section className="flex flex-col md:flex-row items-center justify-center overflow-x-hidden md:justify-between w-full min-h-screen lg:ml-72 px-4">
+      <div className="w-full md:w-1/2 text-center mb-8 md:mb-0">
         <img
-          src={logo}
+          src="/images/task-management.svg"
           alt="Task Management"
-          className="w-3/4 max-w-xs md:max-w-sm lg:max-w-md mx-auto md:mx-0 max-w-full"
+          className="w-3/4 max-w-xs md:max-w-sm lg:max-w-md mx-auto"
         />
       </div>
 
-      <div className="w-full md:w-1/2 px-4">
+      <div className="w-full md:w-1/2">
         <form
-          className="flex flex-col gap-4 w-full max-w-md mx-auto md:mx-0"
+          className="flex flex-col gap-y-3 w-full max-w-md mx-auto bg-white p-6 shadow-md rounded-lg"
           onSubmit={handleSubmit(onSubmit)}
         >
           <Label htmlFor="email" className="text-sm font-medium">
@@ -113,11 +111,11 @@ const Login: React.FC = () => {
             )}
           </div>
 
-          {serverError && (
-            <p className="text-red-500 text-center font-medium">
-              {serverError}
-            </p>
-          )}
+          <div className="h-6 text-center">
+            {serverError && (
+              <p className="text-red-500 font-medium">{serverError}</p>
+            )}
+          </div>
 
           <Button
             type="submit"
@@ -128,16 +126,13 @@ const Login: React.FC = () => {
           </Button>
         </form>
 
-        <h2 className="mt-4 text-center text-sm">OR</h2>
-        <div className="flex flex-col gap-4 w-full max-w-md mx-auto md:mx-0">
-          <Button
-            type="button"
-            className="w-full py-2 mt-4 bg-black text-white rounded-md hover:bg-gray-800 focus:ring-2 focus:ring-gray-300 disabled:opacity-50"
-            onClick={() => navigate('/register')}
-          >
-            Register
-          </Button>
-        </div>
+        <Button
+          type="button"
+          className="w-full py-2 mt-4 bg-black text-white rounded-md hover:bg-gray-800 focus:ring-2 focus:ring-gray-300 disabled:opacity-50"
+          onClick={() => navigate('/register')}
+        >
+          Register
+        </Button>
       </div>
     </section>
   );

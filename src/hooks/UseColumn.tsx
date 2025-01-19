@@ -4,13 +4,7 @@ import { GetTask, Task } from '@api/types/TaskTypes';
 
 export const useColumns = () => {
   const { data, isLoading, isError, refetch } = useGetAllTasksQuery();
-  const [columns, setColumns] = useState<GetTask>(data || {});
+  const columns: GetTask = data || {};
 
-  useEffect(() => {
-    if (data) {
-      setColumns(data);
-    }
-  }, [data]);
-
-  return { columns: columns || [], isLoading, isError, refetch };
+  return { columns, isLoading, isError, refetch };
 };
