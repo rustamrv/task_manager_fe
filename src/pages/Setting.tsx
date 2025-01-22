@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import Navbar from '@components/navbar/Navbar';
 import { Button } from '@components/ui/Button';
 import { useUpdateProfileMutation } from '@api/endpoints/UserApi';
+import { useToast } from '@components/ui/UseToast';
 
 const Settings: React.FC = () => {
+  const { toast } = useToast();
   const [profileData, setProfileData] = useState<{
     username: string;
     image: File | null;
@@ -38,10 +40,15 @@ const Settings: React.FC = () => {
 
     try {
       await updateProfile(formData).unwrap();
-      alert('Profile updated successfully!');
+      setPreviewImage(null);
+      toast({ title: 'Success', description: 'Profile updated successfully!' });
     } catch (error) {
       console.error('Failed to update profile:', error);
-      alert('Failed to update profile. Please try again.');
+      toast({
+        title: 'Error',
+        description: 'Failed to update profile. Please try again.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -51,7 +58,7 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <section className="flex flex-col lg:flex-row min-h-screen p-8 gap-8">
+    <section className="flex flex-col lg:flex-row min-h-screen w-full max-w-full p-4 sm:p-6 lg:p-8 gap-4 sm:gap-6 lg:gap-8">
       {/* Navbar */}
       <Navbar />
 
@@ -89,10 +96,6 @@ const Settings: React.FC = () => {
             </Button>
           </div>
         </form>
-
-        {isSuccess && (
-          <p className="text-green-600 mt-4">Profile updated successfully!</p>
-        )}
       </section>
     </section>
   );

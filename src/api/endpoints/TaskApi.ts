@@ -14,6 +14,12 @@ export const tasksApi = apiSlice.injectEndpoints({
     getAllTasks: builder.query<GetTask, void>({
       query: () => '/tasks',
       providesTags: [TAGS.TASKS],
+      transformResponse: (response: GetTask) => {
+        return response;
+      },
+      transformErrorResponse: (error) => {
+        return { 'to-do': [], 'in-progress': [], done: [] };
+      },
     }),
     addTask: builder.mutation<Task, CreateTask>({
       query: (task: CreateTask) => ({
@@ -24,36 +30,35 @@ export const tasksApi = apiSlice.injectEndpoints({
       invalidatesTags: [TAGS.TASKS],
       async onQueryStarted(task, { dispatch, queryFulfilled }) {
         const tempId = `temp-${Date.now()}`;
-
-        const tempTask: Task = {
+        const tempTask = {
+          ...task,
           id: tempId,
-          title: task.title,
-          description: task.description ?? '',
-          dueDate: task.dueDate ?? null,
-          status: task.status ?? 'to-do',
-          assignee: {
-            _id: task.assignee,
-            username: 'Temporary User',
-            email: 'temp@example.com',
-          },
+          position: 0,
+          assignee: { _id: '', username: '', email: '' },
         };
 
         const patchResult = dispatch(
           tasksApi.util.updateQueryData('getAllTasks', undefined, (draft) => {
-            draft.tasks.push(tempTask);
+            if (!draft[task.status]) {
+              draft[task.status] = [];
+            }
+            draft[task.status] = draft[task.status].filter(
+              (t) => t.id !== tempId
+            );
+
+            const existingTaskIndex = draft[task.status].findIndex(
+              (t) => t.id === tempId
+            );
+
+            if (existingTaskIndex === -1) {
+              draft[task.status].push(tempTask);
+            }
           })
         );
 
         try {
-          const { data } = await queryFulfilled;
-
-          dispatch(
-            tasksApi.util.updateQueryData('getAllTasks', undefined, (draft) => {
-              const index = draft.tasks.findIndex((t) => t.id === tempId);
-              if (index !== -1) draft.tasks[index] = data;
-            })
-          );
-        } catch (error) {
+          await queryFulfilled;
+        } catch {
           patchResult.undo();
         }
       },
@@ -68,22 +73,50 @@ export const tasksApi = apiSlice.injectEndpoints({
       async onQueryStarted({ id, task }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           tasksApi.util.updateQueryData('getAllTasks', undefined, (draft) => {
-            const index = draft.tasks.findIndex((t) => t.id === id);
-            if (index !== -1) {
-              draft.tasks[index] = {
-                ...draft.tasks[index],
-                ...task,
-                assignee: task.assignee
-                  ? typeof task.assignee === 'string'
-                    ? {
-                        _id: task.assignee,
-                        username: 'Temporary Username',
-                        email: 'temp@example.com',
-                      }
-                    : task.assignee
-                  : draft.tasks[index].assignee,
-              };
+            if (!task || !task.status || task.position === undefined) {
+              console.error(
+                'Error: task or task.status is undefined, skipping update.'
+              );
+              return;
             }
+
+            let foundTask: Task | null = null;
+            let currentStatus: string | null = null;
+
+            const statuses = ['to-do', 'in-progress', 'done'];
+            for (const status of statuses) {
+              let taskList = draft[status] ? [...draft[status]] : [];
+
+              const index = taskList.findIndex((t: Task) => t.id === id);
+              if (index !== -1) {
+                foundTask = { ...taskList[index] };
+                currentStatus = status;
+                break;
+              }
+            }
+
+            if (!foundTask || !currentStatus) {
+              return;
+            }
+
+            draft[currentStatus] = draft[currentStatus].filter(
+              (t) => t.id !== id
+            );
+
+            if (!draft[task.status]) {
+              draft[task.status] = [];
+            }
+
+            if (foundTask) {
+              draft[task.status].splice(task.position, 0, {
+                ...foundTask,
+                ...task,
+              } as Task);
+            }
+
+            draft[task.status].forEach((t, index) => {
+              t.position = index;
+            });
           })
         );
 
@@ -103,7 +136,9 @@ export const tasksApi = apiSlice.injectEndpoints({
       async onQueryStarted(id, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           tasksApi.util.updateQueryData('getAllTasks', undefined, (draft) => {
-            draft.tasks = draft.tasks.filter((task) => task.id !== id);
+            for (const status in draft) {
+              draft[status] = draft[status].filter((task) => task.id !== id);
+            }
           })
         );
 
@@ -114,12 +149,10 @@ export const tasksApi = apiSlice.injectEndpoints({
         }
       },
     }),
-
     getTaskStats: builder.query<TaskStatsResponse, void>({
       query: () => '/tasks/stats',
       providesTags: [TAGS.TASKS],
     }),
-
     getTaskCompletionStats: builder.query<TaskCompletionStatsResponse[], void>({
       query: () => '/tasks/completion-stats',
       providesTags: [TAGS.TASKS],

@@ -14,6 +14,7 @@ import Settings from './pages/Setting';
 import Register from './pages/Register';
 import { useSelector } from 'react-redux';
 import { RootState } from '@api/Store';
+import { Toaster } from '@components/ui/Toaster';
 
 const App: React.FC = () => {
   const token = useSelector((state: RootState) => state.auth.token);
@@ -22,6 +23,7 @@ const App: React.FC = () => {
   return (
     <Router>
       <div className="flex flex-col w-full h-screen">
+        <Toaster />
         <Routes>
           <Route
             path="/"

@@ -34,7 +34,7 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
   setIsDialogOpen,
 }) => {
   const { users } = useUsers();
-  const [addTaskMutation] = useAddTaskMutation();
+  const [addTaskMutation, { isLoading }] = useAddTaskMutation();
 
   const {
     register,
@@ -165,8 +165,8 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
             >
               Cancel
             </Button>
-            <Button type="submit" variant="default">
-              Add Task
+            <Button type="submit" variant="default" disabled={isLoading}>
+              {isLoading ? 'Adding...' : 'Add Task'}
             </Button>
           </div>
         </form>

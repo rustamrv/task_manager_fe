@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import React, { useState } from 'react';
+import { DndProvider} from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { Button } from '@components/ui/Button';
 import { useColumns } from '../../hooks/UseColumn';
@@ -14,7 +14,7 @@ const Board: React.FC = () => {
   if (isError) return <p>Error loading tasks.</p>;
 
   return (
-    <section className="flex-grow flex flex-col w-full gap-6 lg:gap-8 overflow-y-auto lg:ml-12">
+    <section className="flex-grow flex flex-col lg:ml-12 p-6 overflow-y-auto">
       <div className="flex flex-col sm:flex-col justify-between items-start sm:items-center border-b border-gray-300 pb-4 mb-6">
         <h1 className="text-xl sm:text-2xl font-bold">Tasks</h1>
         <Button
