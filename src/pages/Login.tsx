@@ -11,6 +11,7 @@ import { Label } from '@components/ui/Label';
 import { BackendError } from '../interfaces/Errors';
 import { loginSchema } from '@utils/validates/RegisterLogin';
 import { LoginFormInputs } from '@utils/validates/types/RegisterLogin.type';
+import { Eye, EyeOff } from 'lucide-react';
 
 const Login: React.FC = () => {
   const {
@@ -24,6 +25,7 @@ const Login: React.FC = () => {
   });
 
   const [serverError, setServerError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -54,9 +56,7 @@ const Login: React.FC = () => {
       const error = error_ as BackendError;
       console.error('Login error:', error);
 
-      setServerError(
-        error?.data?.message || 'Failed to Login. Please try again.'
-      );
+      setServerError(error?.data?.error || 'Failed to Login. Please try again.');
 
       if (error?.data?.message === 'Invalid credentials') {
         setError('email', {
@@ -68,24 +68,22 @@ const Login: React.FC = () => {
   };
 
   return (
-    <section className="flex flex-col md:flex-row items-center justify-center w-full min-h-screen lg:ml-72 px-4">
+    <section className="flex flex-col md:flex-row items-center justify-center w-full min-h-screen px-4 lg:ml-32">
       <div className="w-full md:w-1/2 text-center mb-8 md:mb-0">
         <img
           src="/images/task-management.svg"
           alt="Task Management"
-          className="w-3/4 max-w-xs md:max-w-sm lg:max-w-md"
+          className="w-3/4 max-w-xs md:max-w-sm lg:max-w-md mx-auto"
         />
       </div>
 
       <div className="w-full md:w-1/2 flex flex-col justify-center">
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="w-full max-w-sm mx-auto p-4 border rounded-lg shadow-md bg-white"
+          className="w-full max-w-md mx-auto p-6 border rounded-lg shadow-md bg-white"
         >
           <div className="mb-4">
-            <Label className="block text-sm font-medium text-gray-700">
-              Email
-            </Label>
+            <Label className="block text-sm font-medium text-gray-700">Email</Label>
             <Input
               id="email"
               type="email"
@@ -97,27 +95,30 @@ const Login: React.FC = () => {
             <p className="h-5 text-sm text-red-500">{errors.email?.message}</p>
           </div>
 
-          <div className="mb-4">
-            <Label className="block text-sm font-medium text-gray-700">
-              Password
-            </Label>
-            <Input
-              id="password"
-              type="password"
-              {...register('password')}
-              onChange={() => clearErrorsOnChange('password')}
-              placeholder="Enter your password"
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            />
-            <p className="h-5 text-sm text-red-500">
-              {errors.password?.message}
-            </p>
+          <div className="mb-4 relative">
+            <Label className="block text-sm font-medium text-gray-700">Password</Label>
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                {...register('password')}
+                onChange={() => clearErrorsOnChange('password')}
+                placeholder="Enter your password"
+                className="mt-1 block w-full p-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              /> 
+              <Button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="bg-blue-500 absolute inset-y-0 right-0 flex items-center px-3 hover:bg-blue-600 transition"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </Button>
+            </div>
+            <p className="h-5 text-sm text-red-500">{errors.password?.message}</p>
           </div>
 
           <div className="h-4 min-h-[20px] mb-4 text-center">
-            {serverError && (
-              <p className="text-red-500 font-medium">{serverError}</p>
-            )}
+            {serverError && <p className="text-red-500 font-medium">{serverError}</p>}
           </div>
 
           <Button
@@ -128,7 +129,8 @@ const Login: React.FC = () => {
             {isLoading ? 'Logging in...' : 'Login'}
           </Button>
         </form>
-        <div className="w-full max-w-sm mx-auto">
+
+        <div className="w-full max-w-md mx-auto">
           <Button
             type="button"
             className="w-full py-2 mt-4 bg-black text-white rounded-md hover:bg-gray-800 focus:ring-2 focus:ring-gray-300 disabled:opacity-50"

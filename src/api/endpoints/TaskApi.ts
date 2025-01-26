@@ -28,7 +28,7 @@ export const tasksApi = apiSlice.injectEndpoints({
         body: task,
       }),
       invalidatesTags: [TAGS.TASKS],
-      async onQueryStarted(task, { dispatch, queryFulfilled }) {
+      onQueryStarted: async (task, { dispatch, queryFulfilled }) => {
         const tempId = `temp-${Date.now()}`;
         const tempTask = {
           ...task,
@@ -36,32 +36,45 @@ export const tasksApi = apiSlice.injectEndpoints({
           position: 0,
           assignee: { _id: '', username: '', email: '' },
         };
-
+      
         const patchResult = dispatch(
           tasksApi.util.updateQueryData('getAllTasks', undefined, (draft) => {
             if (!draft[task.status]) {
               draft[task.status] = [];
             }
-            draft[task.status] = draft[task.status].filter(
-              (t) => t.id !== tempId
+            const alreadyExists = draft[task.status].some(
+              (t) => t.title === task.title
             );
-
-            const existingTaskIndex = draft[task.status].findIndex(
-              (t) => t.id === tempId
-            );
-
-            if (existingTaskIndex === -1) {
+      
+            if (!alreadyExists) {
               draft[task.status].push(tempTask);
             }
           })
         );
-
+      
         try {
-          await queryFulfilled;
+          const { data: newTask } = await queryFulfilled;
+      
+          dispatch(
+            tasksApi.util.updateQueryData('getAllTasks', undefined, (draft) => {
+              if (!draft[newTask.status]) {
+                draft[newTask.status] = [];
+              }
+      
+              draft[newTask.status] = draft[newTask.status].filter(
+                (t) => t.id !== tempId
+              );
+      
+              if (!draft[newTask.status].some((t) => t.id === newTask.id)) {
+                draft[newTask.status].push(newTask);
+              }
+            })
+          );
         } catch {
           patchResult.undo();
         }
-      },
+      }
+      
     }),
     updateTask: builder.mutation<Task, { id: string; task: UpdateTask }>({
       query: ({ id, task }) => ({

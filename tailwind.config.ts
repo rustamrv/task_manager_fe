@@ -1,22 +1,16 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
-  darkMode: ['class'], // Тёмная тема активируется через класс
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'], // Файлы, в которых Tailwind будет искать классы
+  darkMode: ['class'], // Темная тема активируется через класс "dark" в HTML
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'], // Файлы, где Tailwind будет искать классы
   theme: {
     extend: {
       container: {
         center: true, // Центрирование контейнера
         padding: {
-          DEFAULT: '1rem', // Отступы по умолчанию для всех экранов
-          sm: '2rem', // Отступы для экранов от 640px
-          lg: '4rem', // Отступы для экранов от 1024px
-        },
-        screens: {
-          sm: '640px', // Маленькие экраны
-          md: '768px', // Планшеты
-          lg: '1024px', // Ноутбуки
-          xl: '1280px', // Большие экраны
+          DEFAULT: '1rem', // Отступы по умолчанию
+          sm: '2rem', // Отступы для небольших экранов
+          lg: '4rem', // Отступы для больших экранов
         },
       },
       colors: {
@@ -62,12 +56,13 @@ const config: Config = {
         },
       },
       borderRadius: {
-        lg: 'var(--radius)', // Большие скругления
-        md: 'calc(var(--radius) - 2px)', // Средние скругления
-        sm: 'calc(var(--radius) - 4px)', // Маленькие скругления
+        lg: 'var(--radius)', // Скругление для больших элементов
+        md: 'calc(var(--radius) - 2px)', // Среднее скругление
+        sm: 'calc(var(--radius) - 4px)', // Маленькое скругление
       },
     },
   },
+  plugins: [],
 };
 
 export default config;

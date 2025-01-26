@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { DndProvider} from 'react-dnd';
+import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { Button } from '@components/ui/Button';
 import { useColumns } from '../../hooks/UseColumn';
@@ -14,12 +14,12 @@ const Board: React.FC = () => {
   if (isError) return <p>Error loading tasks.</p>;
 
   return (
-    <section className="flex-grow flex flex-col lg:ml-12 p-6 overflow-y-auto">
-      <div className="flex flex-col sm:flex-col justify-between items-start sm:items-center border-b border-gray-300 pb-4 mb-6">
+    <section className="flex flex-col mt-16 lg:mt-0">
+      <div className="flex flex-col sm:flex-row justify-between items-center border-gray-300 pb-4 mb-6 bg-white sticky">
         <h1 className="text-xl sm:text-2xl font-bold">Tasks</h1>
         <Button
           onClick={() => setIsDialogOpen(true)}
-          className="mt-4 sm:mt-0 bg-blue-500 text-white hover:bg-blue-600"
+          className="mt-4 sm:mt-0 bg-blue-500 hover:bg-blue-600 text-sm sm:text-base px-4 py-2"
         >
           + Add New Task
         </Button>
@@ -30,15 +30,17 @@ const Board: React.FC = () => {
       />
 
       <DndProvider backend={HTML5Backend}>
-        <div className="flex  gap-6 overflow-x-auto w-full">
-          {Object.keys(columns).map((status: string, index: number) => (
-            <TaskColumn
-              key={index}
-              status={status}
-              tasks={columns}
-              refetch={refetch}
-            />
-          ))}
+        <div className="overflow-x-auto w-full">
+          <div className="flex gap-6 min-w-max md:w-full">
+            {Object.keys(columns).map((status: string, index: number) => (
+              <TaskColumn
+                key={index}
+                status={status}
+                tasks={columns}
+                refetch={refetch}
+              />
+            ))}
+          </div>
         </div>
       </DndProvider>
     </section>

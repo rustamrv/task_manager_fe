@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { useDrag, useDrop } from 'react-dnd';
+import React, { useState } from 'react';
+import { useDrag } from 'react-dnd';
 import { Button } from '@components/ui/Button';
 import { Task } from '../../api/types/TaskTypes';
 import EditTaskForm from '../forms/EditTaskForm';
@@ -14,7 +14,6 @@ interface TaskCardProps {
 
 const TaskCard: React.FC<TaskCardProps> = ({ task, index, refetch }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const [{ isDragging }, drag] = useDrag({
@@ -40,12 +39,17 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, index, refetch }) => {
         {task.assignee?.username || 'Unassigned'}
       </p>
 
-      <div className="flex gap-2">
-        <Button variant="default" onClick={() => setIsEditModalOpen(true)}>
+      <div className="flex flex-col sm:flex-row gap-2">
+        <Button
+          variant="default"
+          className="w-full sm:w-auto"
+          onClick={() => setIsEditModalOpen(true)}
+        >
           Edit
         </Button>
         <Button
           variant="destructive"
+          className="w-full sm:w-auto"
           onClick={() => setIsDeleteModalOpen(true)}
         >
           Delete

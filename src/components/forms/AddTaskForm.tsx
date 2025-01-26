@@ -75,14 +75,17 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild></DialogTrigger>
-      <DialogContent className="w-full max-w-md p-4 sm:p-6 rounded-lg shadow-lg">
+      <DialogContent className="w-full max-w-md mx-auto p-4 sm:p-6 rounded-lg shadow-lg">
         <DialogHeader>
           <DialogTitle>Add New Task</DialogTitle>
           <DialogDescription>
             Fill in the details to create a new task
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col gap-4 w-full"
+        >
           <div>
             <Label htmlFor="title">Title</Label>
             <Input

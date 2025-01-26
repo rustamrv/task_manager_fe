@@ -121,7 +121,7 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
         drop(node);
         containerRef.current = node;
       }}
-      className={`flex flex-col gap-4 border rounded-lg p-4 shadow-md overflow-x-auto overflow-y-auto w-full ${
+      className={`w-full flex flex-col p-6 overflow-y-auto h-[calc(100vh-64px)] ${
         isOver ? 'bg-blue-100' : 'bg-gray-50'
       }`}
     >

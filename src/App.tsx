@@ -22,7 +22,7 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <div className="flex flex-col w-full h-screen">
+      <div className="flex">
         <Toaster />
         <Routes>
           <Route
@@ -44,9 +44,13 @@ const App: React.FC = () => {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
+              isAuthenticated ? (
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              ) : (
+                <Login />
+              )
             }
           />
           <Route

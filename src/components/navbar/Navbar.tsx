@@ -3,16 +3,26 @@ import { Button } from '../ui/Button';
 import { useDispatch } from 'react-redux';
 import { clearToken } from '@api/AuthReducer';
 import { useGetProfileQuery } from '@api/endpoints/UserApi';
+import { useState } from 'react';
+import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { data: profile, isLoading, isError } = useGetProfileQuery();
+  const { data: profile, isLoading, isError, error } = useGetProfileQuery();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const onClickLogout = () => {
     dispatch(clearToken());
     navigate('/');
   };
+
+  if ((error as FetchBaseQueryError)?.status === 401) {
+    dispatch(clearToken()); 
+    localStorage.removeItem("token");
+    navigate('/');
+  }
+  
 
   const MenuItem = ({
     to,
@@ -23,8 +33,8 @@ const Navbar: React.FC = () => {
     icon: string;
     label: string;
   }) => (
-    <li className="flex items-center justify-center lg:justify-start justify-center">
-      <img src={icon} alt={label} className="w-5 h-5 mr-2" />
+    <li className="flex items-center justify-start gap-3 pl-3 py-2 w-full hover:bg-gray-100 rounded-md transition">
+      <img src={icon} alt={label} className="w-5 h-5" />
       <NavLink
         to={to}
         className={({ isActive }) =>
@@ -39,50 +49,73 @@ const Navbar: React.FC = () => {
   );
 
   return (
-    <nav className="flex flex-row lg:flex-col bg-white lg:w-72 w-full h-auto   top-0 left-0 lg:gap-6 gap-4 border border-gray-300 shadow-md rounded-lg p-4 lg:p-6 lg:mb-6 lg:ml-6 lg:h-[calc(100vh-64px)] h-auto">
-      {/* User Profile */}
-      <div className="flex flex-col items-center gap-4 lg:gap-6 mr-8">
-        {isLoading ? (
-          <p className="text-sm text-gray-500 text-center">Loading...</p>
-        ) : isError ? (
-          <p className="text-sm text-red-500 text-center">
-            Failed to load profile
-          </p>
-        ) : profile ? (
-          <div className="flex flex-col items-center text-center">
-            <img
-              src={profile.profileImage || 'https://via.placeholder.com/80'}
-              alt="Profile"
-              className="w-12 h-12 rounded-full"
-            />
-            <h2 className="text-base font-semibold">{profile.username}</h2>
-            <p className="text-sm text-gray-500">{profile.email}</p>
-          </div>
-        ) : null}
-      </div>
-
-      {/* Menu */}
-      <ul className="flex flex-row ml-4 lg:flex-col gap-4 lg:gap-6 mt-6">
-        <MenuItem to="/dashboard" icon="/images/icon-home.png" label="Home" />
-        <MenuItem
-          to="/reports"
-          icon="/images/icon-report.svg"
-          label="Task Reports"
-        />
-        <MenuItem
-          to="/settings"
-          icon="/images/icon-setting.png"
-          label="Settings"
-        />
-      </ul>
-
-      {/* Logout Button */}
-      <div className="mx-auto p-8">
-        <Button type="submit" variant="default" onClick={onClickLogout}>
-          Log out
+    <>
+      <div className="flex items-center justify-between w-full bg-white p-4 shadow-md lg:hidden fixed top-0 left-0 z-50">
+        <Button
+          onClick={() => setIsMenuOpen(true)}
+          className="text-gray-700 focus:outline-none bg-gray-100 hover:bg-gray-200 p-2 rounded-lg transition"
+        >
+          <span className="text-xl">☰</span>
         </Button>
       </div>
-    </nav>
+
+      <div
+        className={`fixed top-0 left-0 h-full bg-white shadow-lg transition-all duration-300 z-50 border-r border-gray-300 rounded-lg overflow-hidden lg:mt-8 lg:ml-8 ${
+          isMenuOpen ? 'w-64' : 'w-0'
+        } lg:w-72 lg:h-[calc(100vh-64px)]`}
+      >
+        <div className="flex flex-col items-center text-center p-6">
+          <Button
+            onClick={() => setIsMenuOpen(false)}
+            className="absolute top-4 right-4 text-gray-700 lg:hidden"
+          >
+            ✖
+          </Button>
+
+          {isLoading ? (
+            <p className="text-sm text-gray-500">Loading...</p>
+          ) : isError ? (
+            <p className="text-sm text-red-500">Failed to load profile</p>
+          ) : profile ? (
+            <>
+              <img
+                src={profile.profileImage || 'https://via.placeholder.com/80'}
+                alt="Profile"
+                className="w-14 h-14 rounded-full border border-gray-300 shadow-sm"
+              />
+              <h2 className="text-lg font-semibold mt-2">{profile.username}</h2>
+              <p className="text-sm text-gray-500">{profile.email}</p>
+            </>
+          ) : null}
+        </div>
+
+        <ul className="flex flex-col items-start gap-4 mt-4 lg:mt-6 pl-6 w-full">
+          <MenuItem to="/dashboard" icon="/images/icon-home.png" label="Home" />
+          <MenuItem
+            to="/reports"
+            icon="/images/icon-report.svg"
+            label="Task Reports"
+          />
+          <MenuItem
+            to="/settings"
+            icon="/images/icon-setting.png"
+            label="Settings"
+          />
+        </ul>
+
+        <div className="mt-auto pt-8 flex justify-center">
+          <Button type="submit" variant="default" onClick={onClickLogout}>
+            Log out
+          </Button>
+        </div>
+      </div>
+      {isMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden transition-opacity"
+          onClick={() => setIsMenuOpen(false)}
+        ></div>
+      )}
+    </>
   );
 };
 
