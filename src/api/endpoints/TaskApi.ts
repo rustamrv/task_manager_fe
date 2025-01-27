@@ -36,7 +36,7 @@ export const tasksApi = apiSlice.injectEndpoints({
           position: 0,
           assignee: { _id: '', username: '', email: '' },
         };
-      
+
         const patchResult = dispatch(
           tasksApi.util.updateQueryData('getAllTasks', undefined, (draft) => {
             if (!draft[task.status]) {
@@ -45,26 +45,26 @@ export const tasksApi = apiSlice.injectEndpoints({
             const alreadyExists = draft[task.status].some(
               (t) => t.title === task.title
             );
-      
+
             if (!alreadyExists) {
               draft[task.status].push(tempTask);
             }
           })
         );
-      
+
         try {
           const { data: newTask } = await queryFulfilled;
-      
+
           dispatch(
             tasksApi.util.updateQueryData('getAllTasks', undefined, (draft) => {
               if (!draft[newTask.status]) {
                 draft[newTask.status] = [];
               }
-      
+
               draft[newTask.status] = draft[newTask.status].filter(
                 (t) => t.id !== tempId
               );
-      
+
               if (!draft[newTask.status].some((t) => t.id === newTask.id)) {
                 draft[newTask.status].push(newTask);
               }
@@ -73,8 +73,7 @@ export const tasksApi = apiSlice.injectEndpoints({
         } catch {
           patchResult.undo();
         }
-      }
-      
+      },
     }),
     updateTask: builder.mutation<Task, { id: string; task: UpdateTask }>({
       query: ({ id, task }) => ({

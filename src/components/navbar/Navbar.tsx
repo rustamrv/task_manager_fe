@@ -18,11 +18,10 @@ const Navbar: React.FC = () => {
   };
 
   if ((error as FetchBaseQueryError)?.status === 401) {
-    dispatch(clearToken()); 
-    localStorage.removeItem("token");
+    dispatch(clearToken());
+    localStorage.removeItem('token');
     navigate('/');
   }
-  
 
   const MenuItem = ({
     to,

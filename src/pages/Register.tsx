@@ -54,7 +54,9 @@ const Register: React.FC = () => {
       const error = error_ as BackendError;
 
       console.error('Registration error:', error);
-      setServerError(error?.data?.error || 'Failed to register. Please try again.');
+      setServerError(
+        error?.data?.error || 'Failed to register. Please try again.'
+      );
     }
   };
 
@@ -104,7 +106,7 @@ const Register: React.FC = () => {
               {errors.email?.message}
             </p>
           </div>
- 
+
           <div className="mb-4 relative">
             <Label className="block text-sm font-medium text-gray-700">
               Password
@@ -112,7 +114,7 @@ const Register: React.FC = () => {
             <div className="relative">
               <Input
                 id="password"
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 placeholder="Enter your password"
                 {...register('password')}
                 onChange={() => clearErrors('password')}
@@ -130,7 +132,7 @@ const Register: React.FC = () => {
               {errors.password?.message}
             </p>
           </div>
- 
+
           <div className="mb-4 relative">
             <Label className="block text-sm font-medium text-gray-700">
               Confirm Password
@@ -138,7 +140,7 @@ const Register: React.FC = () => {
             <div className="relative">
               <Input
                 id="confirmPassword"
-                type={showConfirmPassword ? "text" : "password"}
+                type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="Confirm your password"
                 {...register('confirmPassword')}
                 onChange={() => clearErrors('confirmPassword')}

@@ -22,6 +22,7 @@ const Login: React.FC = () => {
     clearErrors,
   } = useForm<LoginFormInputs>({
     resolver: zodResolver(loginSchema),
+    mode: 'onSubmit'
   });
 
   const [serverError, setServerError] = useState<string | null>(null);
@@ -31,7 +32,7 @@ const Login: React.FC = () => {
 
   const [loginUser, { isLoading }] = useLoginUserMutation();
 
-  const clearErrorsOnChange = (field: keyof LoginFormInputs) => {
+  const clearErrorsOnChange = (field: keyof LoginFormInputs) => {  
     clearErrors(field);
     setServerError(null);
   };
@@ -56,7 +57,9 @@ const Login: React.FC = () => {
       const error = error_ as BackendError;
       console.error('Login error:', error);
 
-      setServerError(error?.data?.error || 'Failed to Login. Please try again.');
+      setServerError(
+        error?.data?.error || 'Failed to Login. Please try again.'
+      );
 
       if (error?.data?.message === 'Invalid credentials') {
         setError('email', {
@@ -83,7 +86,9 @@ const Login: React.FC = () => {
           className="w-full max-w-md mx-auto p-6 border rounded-lg shadow-md bg-white"
         >
           <div className="mb-4">
-            <Label className="block text-sm font-medium text-gray-700">Email</Label>
+            <Label className="block text-sm font-medium text-gray-700">
+              Email
+            </Label>
             <Input
               id="email"
               type="email"
@@ -96,16 +101,18 @@ const Login: React.FC = () => {
           </div>
 
           <div className="mb-4 relative">
-            <Label className="block text-sm font-medium text-gray-700">Password</Label>
+            <Label className="block text-sm font-medium text-gray-700">
+              Password
+            </Label>
             <div className="relative">
               <Input
                 id="password"
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 {...register('password')}
                 onChange={() => clearErrorsOnChange('password')}
                 placeholder="Enter your password"
                 className="mt-1 block w-full p-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              /> 
+              />
               <Button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
@@ -114,11 +121,15 @@ const Login: React.FC = () => {
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </Button>
             </div>
-            <p className="h-5 text-sm text-red-500">{errors.password?.message}</p>
+            <p className="h-5 text-sm text-red-500">
+              {errors.password?.message}
+            </p>
           </div>
 
           <div className="h-4 min-h-[20px] mb-4 text-center">
-            {serverError && <p className="text-red-500 font-medium">{serverError}</p>}
+            {serverError && (
+              <p className="text-red-500 font-medium">{serverError}</p>
+            )}
           </div>
 
           <Button
