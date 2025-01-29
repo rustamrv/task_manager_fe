@@ -19,27 +19,18 @@ const Login: React.FC = () => {
     handleSubmit,
     formState: { errors },
     setError,
-    clearErrors,
   } = useForm<LoginFormInputs>({
     resolver: zodResolver(loginSchema),
-    mode: 'onSubmit'
+    mode: 'onSubmit',
   });
 
-  const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const [loginUser, { isLoading }] = useLoginUserMutation();
 
-  const clearErrorsOnChange = (field: keyof LoginFormInputs) => {  
-    clearErrors(field);
-    setServerError(null);
-  };
-
   const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
-    setServerError(null);
-
     try {
       const response = await loginUser({
         email: data.email,
@@ -57,12 +48,10 @@ const Login: React.FC = () => {
       const error = error_ as BackendError;
       console.error('Login error:', error);
 
-      setServerError(
-        error?.data?.error || 'Failed to Login. Please try again.'
-      );
-
-      if (error?.data?.message === 'Invalid credentials') {
-        setError('email', {
+      // backend responds with object of type { error: string } :)
+      if (error?.data?.error === 'Invalid credentials') {
+        // changed from `email` to `root`. doesn't make sense to assign error to the email field
+        setError('root', {
           type: 'manual',
           message: 'Invalid credentials',
         });
@@ -94,7 +83,8 @@ const Login: React.FC = () => {
               type="email"
               placeholder="Enter your email"
               {...register('email')}
-              onChange={() => clearErrorsOnChange('email')}
+              // reassigning 'onChange' below
+              // onChange={() => clearErrorsOnChange('email')}
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
             <p className="h-5 text-sm text-red-500">{errors.email?.message}</p>
@@ -109,7 +99,8 @@ const Login: React.FC = () => {
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 {...register('password')}
-                onChange={() => clearErrorsOnChange('password')}
+                // reassigning 'onChange' below
+                // onChange={() => clearErrorsOnChange('password')}
                 placeholder="Enter your password"
                 className="mt-1 block w-full p-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               />
@@ -127,8 +118,8 @@ const Login: React.FC = () => {
           </div>
 
           <div className="h-4 min-h-[20px] mb-4 text-center">
-            {serverError && (
-              <p className="text-red-500 font-medium">{serverError}</p>
+            {errors.root && (
+              <p className="text-red-500 font-medium">{errors.root.message}</p>
             )}
           </div>
 
