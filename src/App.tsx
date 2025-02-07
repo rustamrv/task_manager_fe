@@ -15,62 +15,63 @@ import Register from './pages/Register';
 import { useSelector } from 'react-redux';
 import { RootState } from '@api/Store';
 import { Toaster } from '@components/ui/Toaster';
+import PublicRoute from '@components/public/PublicRoute';
 
 const App: React.FC = () => {
   const token = useSelector((state: RootState) => state.auth.token);
-  const isAuthenticated = !!token;
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
 
   return (
     <Router>
-      <div className="flex">
-        <Toaster />
-        <Routes>
-          <Route
-            path="/"
-            element={
-              isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              isAuthenticated ? (
-                <Navigate to="/dashboard" replace />
-              ) : (
-                <Register />
-              )
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              isAuthenticated ? (
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              ) : (
-                <Login />
-              )
-            }
-          />
-          <Route
-            path="/reports"
-            element={
+      <Toaster />
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <PublicRoute path="/">
+              <Login />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <PublicRoute path="/register">
+              <Register />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            isAuthenticated ? (
               <ProtectedRoute>
-                <TaskReport />
+                <Dashboard />
               </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <Settings />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </div>
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute>
+              <TaskReport />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
     </Router>
   );
 };

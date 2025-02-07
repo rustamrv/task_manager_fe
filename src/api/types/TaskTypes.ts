@@ -41,7 +41,7 @@ export type UpdateTaskRequest = {
   title?: string;
   description?: string;
   dueDate?: string;
-  status?: 'to-do' | 'in-progress' | 'done';
+  status?: TaskStatus;
   assignee?: string;
 };
 
@@ -61,3 +61,5 @@ export type TaskCompletionStatsResponse = {
 export type DraggedTask = Task & {
   index: number;
 };
+
+export type TaskStatus = 'to-do' | 'in-progress' | 'done';

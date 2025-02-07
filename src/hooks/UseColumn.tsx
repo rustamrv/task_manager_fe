@@ -1,10 +1,31 @@
 import { useEffect, useState } from 'react';
-import { useGetAllTasksQuery } from '@api/endpoints/TaskApi';
+import {
+  useGetAllTasksQuery,
+  useLazyGetAllTasksQuery,
+} from '@api/endpoints/TaskApi';
 import { GetTask, Task } from '@api/types/TaskTypes';
 
 export const useColumns = () => {
   const { data, isLoading, isError, refetch } = useGetAllTasksQuery();
-  const columns: GetTask = data || {};
+  const [getTasks, { data: searchData, isFetching }] =
+    useLazyGetAllTasksQuery();
+  const [columns, setColumns] = useState(data || ({} as GetTask));
 
-  return { columns, isLoading, isError, refetch };
+  useEffect(() => {
+    if (searchData) {
+      setColumns(searchData);
+    } else if (data) {
+      setColumns(data);
+    }
+  }, [searchData, data]);
+
+  const searchTasks = async (query: string) => {
+    if (query.trim() === '') {
+      await getTasks();
+    } else {
+      await getTasks(query);
+    }
+  };
+
+  return { columns, isLoading, isError, refetch, searchTasks, isFetching };
 };

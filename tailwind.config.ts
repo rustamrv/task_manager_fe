@@ -5,6 +5,9 @@ const config: Config = {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'], // Файлы, где Tailwind будет искать классы
   theme: {
     extend: {
+      maxWidth: {
+        vw: '100vw',
+      },
       container: {
         center: true, // Центрирование контейнера
         padding: {

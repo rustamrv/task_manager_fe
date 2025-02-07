@@ -13,6 +13,7 @@ import { setToken } from '@api/AuthReducer';
 import { BackendError } from '../interfaces/Errors';
 import { registerSchema } from '@utils/validates/RegisterLogin';
 import { RegisterFormInputs } from '@utils/validates/types/RegisterLogin.type';
+import { useToast } from '@components/ui/UseToast';
 
 const Register: React.FC = () => {
   const {
@@ -20,7 +21,6 @@ const Register: React.FC = () => {
     handleSubmit,
     formState: { errors },
     setError,
-    clearErrors,
   } = useForm<RegisterFormInputs>({
     resolver: zodResolver(registerSchema),
   });
@@ -28,13 +28,12 @@ const Register: React.FC = () => {
   const navigate = useNavigate();
   const [registerUser, { isLoading }] = useRegisterUserMutation();
 
-  const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const dispatch = useDispatch();
+  const { toast } = useToast();
 
   const onSubmit = async (data: RegisterFormInputs) => {
-    setServerError(null);
     try {
       const response = await registerUser({
         email: data.email,
@@ -54,9 +53,12 @@ const Register: React.FC = () => {
       const error = error_ as BackendError;
 
       console.error('Registration error:', error);
-      setServerError(
-        error?.data?.error || 'Failed to register. Please try again.'
-      );
+      toast({
+        title: 'Error',
+        description:
+          error?.data?.error || 'Failed to register. Please try again.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -84,7 +86,6 @@ const Register: React.FC = () => {
               type="text"
               placeholder="Enter your username"
               {...register('username')}
-              onChange={() => clearErrors('username')}
             />
             <p className="h-5 text-sm text-red-500 min-h-[20px]">
               {errors.username?.message}
@@ -100,7 +101,6 @@ const Register: React.FC = () => {
               type="email"
               placeholder="Enter your email"
               {...register('email')}
-              onChange={() => clearErrors('email')}
             />
             <p className="h-5 text-sm text-red-500 min-h-[20px]">
               {errors.email?.message}
@@ -117,7 +117,6 @@ const Register: React.FC = () => {
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Enter your password"
                 {...register('password')}
-                onChange={() => clearErrors('password')}
                 className="mt-1 block w-full p-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               />
               <Button
@@ -143,7 +142,6 @@ const Register: React.FC = () => {
                 type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="Confirm your password"
                 {...register('confirmPassword')}
-                onChange={() => clearErrors('confirmPassword')}
                 className="mt-1 block w-full p-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               />
               <Button
@@ -157,14 +155,6 @@ const Register: React.FC = () => {
             <p className="h-5 text-sm text-red-500 min-h-[20px]">
               {errors.confirmPassword?.message}
             </p>
-          </div>
-
-          <div className="min-h-[40px] flex items-center justify-center transition-all duration-300">
-            {serverError && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-center">
-                {serverError}
-              </div>
-            )}
           </div>
 
           <Button

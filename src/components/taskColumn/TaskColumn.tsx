@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useDrop, XYCoord } from 'react-dnd';
+import React, { useEffect, useRef, useState } from 'react';
+import { useDrop } from 'react-dnd';
 import TaskCard from '../taskCard/TaskCard';
 import { useUpdateTaskMutation } from '@api/endpoints/TaskApi';
-import { DraggedTask, GetTask, Task } from '@api/types/TaskTypes';
+import { DraggedTask, GetTask } from '@api/types/TaskTypes';
 import TaskPreview from '@components/taskPreview/TaskPreview';
+import { ScrollArea } from '@components/ui/ScrollArea';
 
 interface TaskColumnProps {
   status: string;
@@ -45,13 +46,15 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
       // Remove the task from the source column
       const [movedCard] = sourceCards.splice(task.index, 1);
 
+      let updatedCard = movedCard; // Initialize updatedCard outside the conditional block
+
       if (newStatus === task.status) {
         // Reorder within the same column
         sourceCards.splice(newIndex, 0, movedCard);
         updatedTasks[task.status] = sourceCards;
       } else {
         // Move to a different column
-        const updatedCard = { ...movedCard, status: newStatus };
+        updatedCard = { ...movedCard, status: newStatus }; // Update status when moving
         targetCards.splice(newIndex, 0, updatedCard);
         updatedTasks[task.status] = sourceCards;
         updatedTasks[newStatus] = targetCards;
@@ -109,46 +112,45 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
     }
   }, [isOver]);
 
-  const memoizedTasks = useMemo(() => tasks, [tasks]);
-
   useEffect(() => {
-    setTasks(memoizedTasks);
-  }, [memoizedTasks]);
+    setTasks(tasks);
+  }, [tasks]);
+
+  drop(containerRef);
 
   return (
     <div
-      ref={(node) => {
-        drop(node);
-        containerRef.current = node;
-      }}
-      className={`w-full flex flex-col p-6 overflow-y-auto h-[calc(100vh-64px)] ${
+      ref={containerRef}
+      className={`w-auto  min-w-[295px] flex flex-col p-6 overflow-y-auto h-[calc(100vh-64px)] ${
         isOver ? 'bg-blue-100' : 'bg-gray-50'
       }`}
     >
-      <header className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">{status}</h2>
-        <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
-          {localTasks[status]?.length || 0}
-        </span>
-      </header>
-      <div className="flex flex-col gap-4">
-        {localTasks[status]?.map((task, index) => (
-          <React.Fragment key={task.id}>
-            {hoverTask && hoverTask.index === index && (
-              <TaskPreview task={hoverTask} />
-            )}
-            <TaskCard
-              key={task.id}
-              task={task}
-              index={index}
-              refetch={refetch}
-            />
-          </React.Fragment>
-        ))}
-        {hoverTask && hoverTask.index === localTasks[status]?.length && (
-          <TaskPreview task={hoverTask} />
-        )}
-      </div>
+      <ScrollArea className="h-full overflow-y-auto">
+        <header className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">{status}</h2>
+          <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm mr-4">
+            {localTasks[status]?.length || 0}
+          </span>
+        </header>
+        <div className="flex flex-col gap-4">
+          {localTasks[status]?.map((task, index) => (
+            <React.Fragment key={task.id}>
+              {hoverTask && hoverTask.index === index && (
+                <TaskPreview task={hoverTask} />
+              )}
+              <TaskCard
+                key={task.id}
+                task={task}
+                index={index}
+                refetch={refetch}
+              />
+            </React.Fragment>
+          ))}
+          {hoverTask && hoverTask.index === localTasks[status]?.length && (
+            <TaskPreview task={hoverTask} />
+          )}
+        </div>
+      </ScrollArea>
     </div>
   );
 };

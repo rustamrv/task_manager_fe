@@ -11,8 +11,11 @@ import { TAGS } from '../constants/Tags';
 
 export const tasksApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getAllTasks: builder.query<GetTask, void>({
-      query: () => '/tasks',
+    getAllTasks: builder.query<GetTask, string | void>({
+      query: (searchTerm) =>
+        searchTerm
+          ? `/tasks?search=${encodeURIComponent(searchTerm)}`
+          : '/tasks',
       providesTags: [TAGS.TASKS],
       transformResponse: (response: GetTask) => {
         return response;
@@ -179,4 +182,5 @@ export const {
   useDeleteTaskMutation,
   useGetTaskStatsQuery,
   useGetTaskCompletionStatsQuery,
+  useLazyGetAllTasksQuery,
 } = tasksApi;

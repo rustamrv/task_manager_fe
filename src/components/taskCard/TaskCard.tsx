@@ -5,6 +5,7 @@ import { Task } from '../../api/types/TaskTypes';
 import EditTaskForm from '../forms/EditTaskForm';
 import { formatDateToLocal } from '@utils/date/FormDate';
 import DeleteTaskForm from '@components/forms/DeleteTaskForm';
+import parse from 'html-react-parser';
 
 interface TaskCardProps {
   task: Task;
@@ -30,7 +31,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, index, refetch }) => {
       }`}
     >
       <h3 className="text-lg font-semibold">{task.title}</h3>
-      <p className="text-sm text-gray-500">{task.description}</p>
+      <p className="text-sm text-gray-500">{parse(task.description)}</p>
       <p className="text-sm text-gray-500">
         {task.dueDate ? formatDateToLocal(task.dueDate) : ''}
       </p>

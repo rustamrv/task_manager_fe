@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogTrigger,
@@ -17,24 +17,20 @@ import {
   SelectItem,
   SelectValue,
 } from '@components/ui/Select';
+import { useForm } from 'react-hook-form';
 import { useUsers } from '../../hooks/UseUsers';
 import { useAddTaskMutation } from '@api/endpoints/TaskApi';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { TaskError } from 'src/interfaces/Errors';
 import { addTaskSchema } from '@utils/validates/AddTask';
 import { AddTaskFormInputs } from '@utils/validates/types/AddTask.type';
+import { TaskError } from 'src/interfaces/Errors';
+import { TaskStatus } from '@api/types/TaskTypes';
+import ReactQuill from 'react-quill';
 
-interface AddTaskFormProps {
-  isDialogOpen: boolean;
-  setIsDialogOpen: (open: boolean) => void;
-}
-
-const AddTaskForm: React.FC<AddTaskFormProps> = ({
-  isDialogOpen,
-  setIsDialogOpen,
-}) => {
+const AddTaskForm: React.FC = () => {
   const { users } = useUsers();
   const [addTaskMutation, { isLoading }] = useAddTaskMutation();
+  const [isOpen, setIsOpen] = useState(false);
 
   const {
     register,
@@ -50,8 +46,8 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
   const onSubmit = async (data: AddTaskFormInputs) => {
     try {
       await addTaskMutation(data).unwrap();
-      setIsDialogOpen(false);
       reset();
+      setIsOpen(false);
     } catch (error_) {
       const error = error_ as TaskError;
       const backendErrors = error?.data?.errors || [];
@@ -73,19 +69,20 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
   };
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTrigger asChild></DialogTrigger>
-      <DialogContent className="w-full max-w-md mx-auto p-4 sm:p-6 rounded-lg shadow-lg">
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button className="mt-4 sm:mt-0 bg-blue-500 hover:bg-blue-600 text-sm sm:text-base px-4 py-2 sm:top-10">
+          + Add New Task
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="overflow-y-auto mb-20 sm:p-6 rounded-lg shadow-lg bg-white">
         <DialogHeader>
           <DialogTitle>Add New Task</DialogTitle>
           <DialogDescription>
             Fill in the details to create a new task
           </DialogDescription>
         </DialogHeader>
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-4 w-full"
-        >
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div>
             <Label htmlFor="title">Title</Label>
             <Input
@@ -100,11 +97,11 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
 
           <div>
             <Label htmlFor="description">Description</Label>
-            <Input
-              {...register('description')}
-              placeholder="Enter description"
-              className="w-full"
+            <ReactQuill
+              theme="snow"
+              onChange={(value) => setValue('description', value)}
             />
+
             {errors.description && (
               <p className="text-red-500">{errors.description.message}</p>
             )}
@@ -121,9 +118,7 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
           <div>
             <Label htmlFor="status">Status</Label>
             <Select
-              onValueChange={(value) =>
-                setValue('status', value as 'to-do' | 'in-progress' | 'done')
-              }
+              onValueChange={(value) => setValue('status', value as TaskStatus)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select status" />
@@ -161,11 +156,7 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
           {errors.root && <p className="text-red-500">{errors.root.message}</p>}
 
           <div className="flex justify-end gap-4">
-            <Button
-              type="button"
-              onClick={() => setIsDialogOpen(false)}
-              variant="secondary"
-            >
+            <Button type="button" variant="secondary">
               Cancel
             </Button>
             <Button type="submit" variant="default" disabled={isLoading}>

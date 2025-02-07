@@ -12,6 +12,7 @@ import { BackendError } from '../interfaces/Errors';
 import { loginSchema } from '@utils/validates/RegisterLogin';
 import { LoginFormInputs } from '@utils/validates/types/RegisterLogin.type';
 import { Eye, EyeOff } from 'lucide-react';
+import { useToast } from '@components/ui/UseToast';
 
 const Login: React.FC = () => {
   const {
@@ -29,6 +30,7 @@ const Login: React.FC = () => {
   const dispatch = useDispatch();
 
   const [loginUser, { isLoading }] = useLoginUserMutation();
+  const { toast } = useToast();
 
   const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
     try {
@@ -48,14 +50,11 @@ const Login: React.FC = () => {
       const error = error_ as BackendError;
       console.error('Login error:', error);
 
-      // backend responds with object of type { error: string } :)
-      if (error?.data?.error === 'Invalid credentials') {
-        // changed from `email` to `root`. doesn't make sense to assign error to the email field
-        setError('root', {
-          type: 'manual',
-          message: 'Invalid credentials',
-        });
-      }
+      toast({
+        title: 'Error',
+        description: error?.data?.error,
+        variant: 'destructive',
+      });
     }
   };
 

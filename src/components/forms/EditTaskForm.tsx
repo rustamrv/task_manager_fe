@@ -13,12 +13,13 @@ import {
 import { useUsers } from '../../hooks/UseUsers';
 import { TaskError } from '../../interfaces/Errors';
 import ModalComponent from '../ui/ModalComponent';
-import { Task } from '@api/types/TaskTypes';
+import { Task, TaskStatus } from '@api/types/TaskTypes';
 import { useUpdateTaskMutation } from '@api/endpoints/TaskApi';
 import { formatDateToLocal } from '@utils/date/FormDate';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { editTaskSchema } from '@utils/validates/EditTask';
 import { EditTaskFormInputs } from '@utils/validates/types/EditTask.type';
+import ReactQuill from 'react-quill';
 
 interface EditTaskFormProps {
   task: Task;
@@ -49,7 +50,7 @@ const EditTaskForm: React.FC<EditTaskFormProps> = ({
       title: task.title,
       description: task.description,
       dueDate: formatDateToLocal(task.dueDate),
-      status: task.status as 'to-do' | 'in-progress' | 'done',
+      status: task.status as TaskStatus,
       assignee: task.assignee?._id,
     },
   });
@@ -104,11 +105,12 @@ const EditTaskForm: React.FC<EditTaskFormProps> = ({
 
         <div>
           <Label htmlFor="description">Description</Label>
-          <Input
-            {...register('description')}
-            placeholder="Enter task description"
-            className="w-full"
+          <ReactQuill
+            theme="snow"
+            value={task.description}
+            onChange={(value) => setValue('description', value)}
           />
+
           {errors.description && (
             <p className="text-red-500">{errors.description.message}</p>
           )}
@@ -125,9 +127,7 @@ const EditTaskForm: React.FC<EditTaskFormProps> = ({
         <div>
           <Label htmlFor="status">Status</Label>
           <Select
-            onValueChange={(value) =>
-              setValue('status', value as 'to-do' | 'in-progress' | 'done')
-            }
+            onValueChange={(value) => setValue('status', value as TaskStatus)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select a status" />
