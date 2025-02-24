@@ -20,7 +20,7 @@ export const tasksApi = apiSlice.injectEndpoints({
       transformResponse: (response: GetTask) => {
         return response;
       },
-      transformErrorResponse: (error) => {
+      transformErrorResponse: () => {
         return { 'to-do': [], 'in-progress': [], done: [] };
       },
     }),
@@ -100,7 +100,7 @@ export const tasksApi = apiSlice.injectEndpoints({
 
             const statuses = ['to-do', 'in-progress', 'done'];
             for (const status of statuses) {
-              let taskList = draft[status] ? [...draft[status]] : [];
+              const taskList = draft[status] ? [...draft[status]] : [];
 
               const index = taskList.findIndex((t: Task) => t.id === id);
               if (index !== -1) {

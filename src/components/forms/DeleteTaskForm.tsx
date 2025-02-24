@@ -6,12 +6,10 @@ interface DeleteTaskFormProps {
   id: string;
   isDeleteModalOpen: boolean;
   setIsDeleteModalOpen: (open: boolean) => void;
-  refetch: () => void;
 }
 
 const DeleteTaskForm: React.FC<DeleteTaskFormProps> = ({
   id,
-  refetch,
   isDeleteModalOpen,
   setIsDeleteModalOpen,
 }) => {
@@ -20,7 +18,7 @@ const DeleteTaskForm: React.FC<DeleteTaskFormProps> = ({
   const handleDeleteTask = async (id: string) => {
     try {
       await deleteTaskMutation(id).unwrap();
-      refetch();
+      ///
       setIsDeleteModalOpen(false);
     } catch (error) {
       console.error('Failed to delete task:', error);

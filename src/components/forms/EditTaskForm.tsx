@@ -25,12 +25,10 @@ interface EditTaskFormProps {
   task: Task;
   isEditModalOpen: boolean;
   setIsEditModalOpen: (open: boolean) => void;
-  refetch: () => void;
 }
 
 const EditTaskForm: React.FC<EditTaskFormProps> = ({
   task,
-  refetch,
   isEditModalOpen,
   setIsEditModalOpen,
 }) => {
@@ -42,7 +40,6 @@ const EditTaskForm: React.FC<EditTaskFormProps> = ({
     handleSubmit,
     setValue,
     setError,
-    reset,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(editTaskSchema),
@@ -61,7 +58,7 @@ const EditTaskForm: React.FC<EditTaskFormProps> = ({
         id: task.id,
         task: formData,
       }).unwrap();
-      refetch();
+      ///
       setIsEditModalOpen(false);
     } catch (error_) {
       const error = error_ as TaskError;

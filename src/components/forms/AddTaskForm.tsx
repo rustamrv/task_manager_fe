@@ -31,6 +31,7 @@ const AddTaskForm: React.FC = () => {
   const { users } = useUsers();
   const [addTaskMutation, { isLoading }] = useAddTaskMutation();
   const [isOpen, setIsOpen] = useState(false);
+  const closeModal = () => setIsOpen(false);
 
   const {
     register,
@@ -47,7 +48,7 @@ const AddTaskForm: React.FC = () => {
     try {
       await addTaskMutation(data).unwrap();
       reset();
-      setIsOpen(false);
+      closeModal();
     } catch (error_) {
       const error = error_ as TaskError;
       const backendErrors = error?.data?.errors || [];
@@ -156,7 +157,7 @@ const AddTaskForm: React.FC = () => {
           {errors.root && <p className="text-red-500">{errors.root.message}</p>}
 
           <div className="flex justify-end gap-4">
-            <Button type="button" variant="secondary">
+            <Button type="button" variant="secondary" onClick={closeModal}>
               Cancel
             </Button>
             <Button type="submit" variant="default" disabled={isLoading}>

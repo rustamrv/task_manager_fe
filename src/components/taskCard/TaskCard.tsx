@@ -10,10 +10,9 @@ import parse from 'html-react-parser';
 interface TaskCardProps {
   task: Task;
   index: number;
-  refetch: () => void;
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({ task, index, refetch }) => {
+const TaskCard: React.FC<TaskCardProps> = ({ task, index }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -59,14 +58,12 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, index, refetch }) => {
 
       <EditTaskForm
         task={task}
-        refetch={refetch}
         isEditModalOpen={isEditModalOpen}
         setIsEditModalOpen={setIsEditModalOpen}
       />
 
       <DeleteTaskForm
         id={task.id}
-        refetch={refetch}
         isDeleteModalOpen={isDeleteModalOpen}
         setIsDeleteModalOpen={setIsDeleteModalOpen}
       />

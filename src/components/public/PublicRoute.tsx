@@ -6,20 +6,14 @@ import { setInitialState, setPending } from '@api/AuthSlice';
 
 interface PublicRouteProps {
   children: React.ReactNode;
-  path: string;
 }
 
-const PublicRoute: React.FC<PublicRouteProps> = ({ children, path }) => {
+const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
   const dispatch = useDispatch();
   const isAuthenticated = useSelector((state: RootState) => {
     return state.auth.isAuthenticated;
   });
   const isPending = useSelector((state: RootState) => state.auth.isPending);
-
-  console.log({
-    isPending,
-    isAuthenticated,
-  });
 
   useEffect(() => {
     dispatch(setPending());

@@ -1,17 +1,16 @@
 import React from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { useColumns } from '../../hooks/UseColumn';
 import TaskColumn from '../taskColumn/TaskColumn';
 import AddTaskForm from '@components/forms/AddTaskForm';
 import SearchBar from '@components/search/SearchBar';
 import LoadingSpinner from '@components/loader/Loader';
+import { useTasks } from '@components/context/TaskContext';
 
 const Board: React.FC = () => {
-  const { columns, isLoading, isError, refetch, searchTasks, isFetching } =
-    useColumns();
+  const { tasks, isLoading, isFetching, searchTasks } = useTasks();
 
-  if (isError)
+  if (isFetching)
     return <p className="text-center text-red-500">Error loading tasks.</p>;
 
   return (
@@ -29,13 +28,8 @@ const Board: React.FC = () => {
 
       <DndProvider backend={HTML5Backend}>
         <div className="overflow-x-auto w-full flex gap-6">
-          {Object.keys(columns).map((status: string, index: number) => (
-            <TaskColumn
-              key={index}
-              status={status}
-              tasks={columns}
-              refetch={refetch}
-            />
+          {Object.keys(tasks).map((status: string, index: number) => (
+            <TaskColumn key={index} status={status} tasks={tasks} />
           ))}
         </div>
       </DndProvider>

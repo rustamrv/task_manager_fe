@@ -9,10 +9,9 @@ import { ScrollArea } from '@components/ui/ScrollArea';
 interface TaskColumnProps {
   status: string;
   tasks: GetTask;
-  refetch: () => void;
 }
 
-const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
+const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks }) => {
   const [localTasks, setTasks] = useState<GetTask>(tasks);
 
   const [updateTaskMutation] = useUpdateTaskMutation();
@@ -90,7 +89,7 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
 
       // Calculate hover index
       const hoverIndex = Math.min(
-        Math.max(0, Math.floor(hoverClientY / taskHeight)),
+        Math.max(0, Math.floor((hoverClientY + taskHeight) / 4 / taskHeight)),
         localTasks[status]?.length || 0 // Clamp within valid task indices
       );
 
@@ -138,12 +137,7 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ status, tasks, refetch }) => {
               {hoverTask && hoverTask.index === index && (
                 <TaskPreview task={hoverTask} />
               )}
-              <TaskCard
-                key={task.id}
-                task={task}
-                index={index}
-                refetch={refetch}
-              />
+              <TaskCard key={task.id} task={task} index={index} />
             </React.Fragment>
           ))}
           {hoverTask && hoverTask.index === localTasks[status]?.length && (
