@@ -11,7 +11,7 @@ export const processTaskCompletionData = (
       const normalizedStatus = status.toLowerCase();
 
       if (!normalizedData[date]) {
-        normalizedData[date] = { date, 'to do': 0, done: 0, 'in-progress': 0 };
+        normalizedData[date] = { date, 'to-do': 0, done: 0, 'in-progress': 0 };
       }
 
       normalizedData[date][normalizedStatus] =

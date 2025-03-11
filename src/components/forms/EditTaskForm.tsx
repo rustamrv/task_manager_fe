@@ -40,6 +40,7 @@ const EditTaskForm: React.FC<EditTaskFormProps> = ({
     handleSubmit,
     setValue,
     setError,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(editTaskSchema),
@@ -125,6 +126,7 @@ const EditTaskForm: React.FC<EditTaskFormProps> = ({
           <Label htmlFor="status">Status</Label>
           <Select
             onValueChange={(value) => setValue('status', value as TaskStatus)}
+            value={watch('status')}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select a status" />
@@ -142,7 +144,10 @@ const EditTaskForm: React.FC<EditTaskFormProps> = ({
 
         <div>
           <Label htmlFor="assignee">Assignee</Label>
-          <Select onValueChange={(value) => setValue('assignee', value)}>
+          <Select
+            onValueChange={(value) => setValue('assignee', value)}
+            value={watch('assignee')}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select an assignee" />
             </SelectTrigger>

@@ -18,7 +18,6 @@ import { Toaster } from '@components/ui/Toaster';
 import PublicRoute from '@components/public/PublicRoute';
 
 const App: React.FC = () => {
-  const token = useSelector((state: RootState) => state.auth.token);
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated
   );
@@ -30,7 +29,7 @@ const App: React.FC = () => {
         <Route
           path="/"
           element={
-            <PublicRoute path="/">
+            <PublicRoute>
               <Login />
             </PublicRoute>
           }
@@ -38,7 +37,7 @@ const App: React.FC = () => {
         <Route
           path="/register"
           element={
-            <PublicRoute path="/register">
+            <PublicRoute>
               <Register />
             </PublicRoute>
           }

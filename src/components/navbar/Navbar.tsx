@@ -1,4 +1,4 @@
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { useDispatch } from 'react-redux';
 import { clearToken } from '@api/AuthReducer';

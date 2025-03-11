@@ -28,7 +28,7 @@ const TaskCompletionReport: React.FC = () => {
 
   if (isLoading || !data) return <LoadingSpinner />;
   if (error) return <div>Error loading detailed report</div>;
-
+  
   return (
     <section className="flex flex-col gap-6 mt-6 overflow-x-auto">
       <div className="p-4 bg-white rounded-lg shadow-lg border-t-4 border-green-500 mb-6 w-full min-w-[800px] ">
@@ -48,7 +48,7 @@ const TaskCompletionReport: React.FC = () => {
               <Legend verticalAlign="top" height={36} />
               <Area
                 type="monotone"
-                dataKey="to do"
+                dataKey="to-do"
                 stackId="1"
                 stroke="#8884d8"
                 fill="#8884d8"
@@ -87,7 +87,7 @@ const TaskCompletionReport: React.FC = () => {
               <YAxis allowDecimals={false} />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="to do" stroke="#8884d8" />
+              <Line type="monotone" dataKey="to-do" stroke="#8884d8" />
               <Line type="monotone" dataKey="in-progress" stroke="#82ca9d" />
               <Line type="monotone" dataKey="done" stroke="#ffc658" />
             </LineChart>

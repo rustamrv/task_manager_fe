@@ -72,7 +72,7 @@ const AddTaskForm: React.FC = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="mt-4 sm:mt-0 bg-blue-500 hover:bg-blue-600 text-sm sm:text-base px-4 py-2 sm:top-10">
+        <Button className="mt-4 mr-0 sm:mr-16 sm:mt-0 bg-blue-500 hover:bg-blue-600 text-sm sm:text-base px-4 py-2 sm:top-10">
           + Add New Task
         </Button>
       </DialogTrigger>

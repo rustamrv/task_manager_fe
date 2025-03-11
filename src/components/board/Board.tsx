@@ -8,10 +8,7 @@ import LoadingSpinner from '@components/loader/Loader';
 import { useTasks } from '@components/context/TaskContext';
 
 const Board: React.FC = () => {
-  const { tasks, isLoading, isFetching, searchTasks } = useTasks();
-
-  if (isFetching)
-    return <p className="text-center text-red-500">Error loading tasks.</p>;
+  const { tasks, isLoading, searchTasks } = useTasks();
 
   return (
     <section className="flex-col mt-16 lg:mt-0">
